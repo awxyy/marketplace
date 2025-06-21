@@ -1,4 +1,4 @@
-package com.dotdot.marketplace.entity;
+package com.dotdot.marketplace.user.entity;
 
 
 import lombok.AllArgsConstructor;
