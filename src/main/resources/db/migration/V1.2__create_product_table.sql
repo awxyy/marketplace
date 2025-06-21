@@ -1,0 +1,8 @@
+CREATE TABLE product (
+    id BIGINT PRIMARY KEY ,
+    name VARCHAR(255) NOT NULL ,
+    description VARCHAR(255) NOT NULL ,
+    price INTEGER NOT NULL ,
+    status VARCHAR(255) DEFAULT 'NOT_AVAILABLE',
+    seller VARCHAR(255) NOT NULL
+)
