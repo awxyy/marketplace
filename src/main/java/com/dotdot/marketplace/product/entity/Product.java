@@ -33,7 +33,7 @@ public class Product {
     @JoinColumn(name ="seller")
     private User seller;
 
-    @ElementCollection
+    @Enumerated(EnumType.STRING)
     private ProductStatus status;
 
     @Column(name = "created_at")
