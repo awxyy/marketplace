@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 
 @Getter
 @Setter
@@ -33,5 +35,8 @@ public class Product {
 
     @ElementCollection
     private ProductStatus status;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
 }
