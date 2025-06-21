@@ -1,14 +1,12 @@
 package com.dotdot.marketplace.user.entity;
 
 
-import com.dotdot.marketplace.user.repository.UserRepository;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.lang.model.element.Name;
 import java.time.LocalDateTime;
 
 
