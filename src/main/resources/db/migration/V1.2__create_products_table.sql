@@ -1,0 +1,14 @@
+CREATE TABLE products (
+    id BIGINT PRIMARY KEY ,
+    name VARCHAR(255) NOT NULL ,
+    description TEXT NOT NULL ,
+    price NUMERIC(10, 2) NOT NULL ,
+    status VARCHAR(255) DEFAULT 'NOT_AVAILABLE',
+    seller BIGINT NOT NULL,
+    created_at TIMESTAMP  NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE products
+    ADD CONSTRAINT fk_product_seller
+        FOREIGN KEY (seller)
+            REFERENCES users(id);

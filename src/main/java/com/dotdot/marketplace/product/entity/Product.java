@@ -1,6 +1,7 @@
-package com.dotdot.marketplace.user.entity;
+package com.dotdot.marketplace.product.entity;
 
 
+import com.dotdot.marketplace.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,22 +16,25 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "users")
-public class User {
+@Table(name = "products")
+public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    private String login;
+    private String name;
 
-    private String password;
+    private String description;
 
-    @Column(name = "full_name")
-    private String fullName;
+    private double price;
 
-    @Enumerated(EnumType.STRING)
-    private UserRole role;
+    @ManyToOne
+    @JoinColumn(name ="seller")
+    private User seller;
+
+    @ElementCollection
+    private ProductStatus status;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
