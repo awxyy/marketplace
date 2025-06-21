@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: marketplace
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/marketplace
+    username: postgres
+    password: Andrii2005 #postgres!
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none      # або validate/create — залежно від потреб
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: true           # автоматично запускати міграції
+    baseline-on-migrate: true
+
+server:
+  port: 8080
