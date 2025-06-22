@@ -1,5 +1,5 @@
 CREATE TABLE cart_items(
-    id BIGINT NOT NULL ,
+    id BIGINT PRIMARY KEY ,
     user_id BIGINT NOT NULL ,
     product_id BIGINT NOT NULL ,
     quantity INT CHECK (quantity > 0),
