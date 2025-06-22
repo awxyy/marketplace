@@ -8,3 +8,9 @@
 ```bash
 docker-compose up --build
 ```  
+
+## If new migrations added run this
+```bash
+./gradlew clean build
+docker-compose up --build
+```
