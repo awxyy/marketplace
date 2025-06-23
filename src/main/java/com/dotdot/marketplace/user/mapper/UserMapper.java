@@ -1,4 +1,4 @@
-package com.dotdot.marketplace.user.usermapper;
+package com.dotdot.marketplace.user.mapper;
 
 import com.dotdot.marketplace.user.dto.UserRequestDto;
 import com.dotdot.marketplace.user.entity.User;

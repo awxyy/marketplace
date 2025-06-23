@@ -5,7 +5,7 @@ import com.dotdot.marketplace.user.dto.UserRequestDto;
 import com.dotdot.marketplace.user.dto.UserResponseDto;
 import com.dotdot.marketplace.user.entity.User;
 import com.dotdot.marketplace.user.repository.UserRepository;
-import com.dotdot.marketplace.user.usermapper.UserMapper;
+import com.dotdot.marketplace.user.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
