@@ -1,4 +1,4 @@
-package com.dotdot.marketplace.CartItem.entity;
+package com.dotdot.marketplace.cartitem.entity;
 
 import com.dotdot.marketplace.product.entity.Product;
 import com.dotdot.marketplace.user.entity.User;

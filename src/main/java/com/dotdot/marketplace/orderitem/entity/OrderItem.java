@@ -1,4 +1,4 @@
-package com.dotdot.marketplace.OrderItem.entity;
+package com.dotdot.marketplace.orderitem.entity;
 
 import com.dotdot.marketplace.order.entity.Order;
 import com.dotdot.marketplace.product.entity.Product;
