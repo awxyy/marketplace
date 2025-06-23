@@ -6,10 +6,9 @@ import com.dotdot.marketplace.user.dto.UserResponseDto;
 import com.dotdot.marketplace.user.entity.User;
 import com.dotdot.marketplace.user.repository.UserRepository;
 import com.dotdot.marketplace.user.usermapper.UserMapper;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-
-import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -64,6 +63,5 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Password must not be empty");
         }
     }
-
 
 }

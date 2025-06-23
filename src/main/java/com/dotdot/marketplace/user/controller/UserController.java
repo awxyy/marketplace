@@ -5,7 +5,6 @@ import com.dotdot.marketplace.user.dto.UserRequestDto;
 import com.dotdot.marketplace.user.dto.UserResponseDto;
 import com.dotdot.marketplace.user.service.UserServiceImpl;
 import jakarta.validation.Valid;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,12 +22,12 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponseDto> getUserById(@PathVariable long id ) {
+    public ResponseEntity<UserResponseDto> getUserById(@PathVariable long id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDto> updateUser(@PathVariable long id , @Valid @RequestBody UserRequestDto userRequest) {
+    public ResponseEntity<UserResponseDto> updateUser(@PathVariable long id, @Valid @RequestBody UserRequestDto userRequest) {
         return ResponseEntity.ok(userService.updateUser(id, userRequest));
     }
 
@@ -37,8 +36,5 @@ public class UserController {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
-
-
-
 
 }

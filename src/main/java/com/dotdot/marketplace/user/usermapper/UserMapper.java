@@ -4,8 +4,6 @@ import com.dotdot.marketplace.user.dto.UserRequestDto;
 import com.dotdot.marketplace.user.entity.User;
 import com.dotdot.marketplace.user.entity.UserRole;
 
-
-
 public class UserMapper {
 
     public static User toEntity(UserRequestDto dto) {
@@ -18,7 +16,5 @@ public class UserMapper {
         user.setRole(UserRole.USER);
         return user;
     }
-
-
 
 }
