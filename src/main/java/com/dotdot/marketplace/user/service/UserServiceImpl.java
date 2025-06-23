@@ -1,0 +1,67 @@
+package com.dotdot.marketplace.user.service;
+
+import com.dotdot.marketplace.exception.UserNotFoundException;
+import com.dotdot.marketplace.user.dto.UserRequestDto;
+import com.dotdot.marketplace.user.dto.UserResponseDto;
+import com.dotdot.marketplace.user.entity.User;
+import com.dotdot.marketplace.user.repository.UserRepository;
+import com.dotdot.marketplace.user.usermapper.UserMapper;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+
+
+@RequiredArgsConstructor
+@Service
+public class UserServiceImpl implements UserService {
+
+    private final UserRepository userRepository;
+
+    private final ModelMapper modelMapper;
+
+    @Override
+    public UserResponseDto createUser(UserRequestDto userRequest) {
+        validatePassword(userRequest.getPassword());
+        User user = UserMapper.toEntity(userRequest);
+// TODO: Hash password before saving (e.g., BCryptPasswordEncoder)
+        user.setCreatedAt(LocalDateTime.now());
+        User savedUser = userRepository.save(user);
+
+        return modelMapper.map(savedUser, UserResponseDto.class);
+    }
+
+    @Override
+    public UserResponseDto getUserById(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+        return modelMapper.map(user, UserResponseDto.class);
+    }
+
+    @Override
+    public UserResponseDto updateUser(Long id, UserRequestDto userRequest) {
+        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+
+        validatePassword(userRequest.getPassword());
+
+        User userToUpdate = UserMapper.toEntity(userRequest);
+        user.setCreatedAt(LocalDateTime.now());
+        User savedUser = userRepository.save(userToUpdate);
+        return modelMapper.map(savedUser, UserResponseDto.class);
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new UserNotFoundException("User not found with id: " + id);
+        }
+        userRepository.deleteById(id);
+    }
+
+    private void validatePassword(String password) {
+        if (password == null || password.isBlank()) {
+            throw new IllegalArgumentException("Password must not be empty");
+        }
+    }
+
+}
