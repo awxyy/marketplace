@@ -9,6 +9,7 @@ import com.dotdot.marketplace.user.entity.User;
 import com.dotdot.marketplace.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -21,24 +22,19 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
-
-    private static final ProductStatus DEFAULT_STATUS = ProductStatus.AVAILABLE;
+    private final ModelMapper modelMapper;
 
     @Override
     public ProductResponseDto create(ProductRequestDto request) {
-        User seller = userRepository.findById(request.getSellerId()).orElseThrow(() -> new IllegalArgumentException("Seller with ID " + request.getSellerId() + " does not exist"));
+        User seller = userRepository.findById(request.getSellerId())
+                .orElseThrow(() -> new IllegalArgumentException("Seller with ID " + request.getSellerId() + " does not exist"));
 
-        Product product = new Product();
-        product.setName(request.getName());
-        product.setDescription(request.getDescription());
-        product.setPrice(request.getPrice());
+        Product product = modelMapper.map(request, Product.class);
         product.setSeller(seller);
-        product.setStatus(DEFAULT_STATUS);
         product.setCreatedAt(LocalDateTime.now());
+        product.setStatus(ProductStatus.AVAILABLE);
 
-        Product saved = productRepository.save(product);
-
-        return mapToResponse(saved);
+        return modelMapper.map(productRepository.save(product), ProductResponseDto.class);
     }
 
     @Override
@@ -46,14 +42,14 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Product with ID " + id + " not found"));
 
-        return mapToResponse(product);
+        return modelMapper.map(product, ProductResponseDto.class);
     }
 
     @Override
     public List<ProductResponseDto> getAll() {
         return productRepository.findAll()
                 .stream()
-                .map(this::mapToResponse)
+                .map(product -> modelMapper.map(product, ProductResponseDto.class))
                 .collect(Collectors.toList());
     }
 
@@ -69,10 +65,9 @@ public class ProductServiceImpl implements ProductService {
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
         product.setSeller(seller);
-        // не змінюємо createdAt і status
-        Product updated = productRepository.save(product);
+        Product updatedProduct = productRepository.save(product);
 
-        return mapToResponse(updated);
+        return modelMapper.map(updatedProduct, ProductResponseDto.class);
     }
 
     @Override
@@ -82,15 +77,4 @@ public class ProductServiceImpl implements ProductService {
         productRepository.delete(product);
     }
 
-    private ProductResponseDto mapToResponse(Product product) {
-        return new ProductResponseDto(
-                product.getId(),
-                product.getName(),
-                product.getDescription(),
-                product.getPrice(),
-                product.getSeller().getLogin(),
-                product.getStatus().name(),
-                product.getCreatedAt()
-        );
-    }
 }
