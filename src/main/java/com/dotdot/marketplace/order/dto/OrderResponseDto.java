@@ -20,5 +20,5 @@ public class OrderResponseDto {
     private double totalPrice;
     private LocalDateTime createdAt;
     private long userId;
-    List<OrderItem> orderItems;
+    private List<OrderItem> orderItems;
 }

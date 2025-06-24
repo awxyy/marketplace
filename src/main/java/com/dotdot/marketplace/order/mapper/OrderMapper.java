@@ -23,8 +23,6 @@ public class OrderMapper {
         if (dto.getStatus() != null) {
             existingOrder.setStatus(dto.getStatus());
         }
-
-
         return existingOrder;
     }
 

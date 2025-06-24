@@ -69,12 +69,15 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void deleteOrderById(Long id) {
+        if(!orderRepository.existsById(id)) {
+            throw new OrderNotFoundException("Order not found with id: " + id);
+        }
         orderRepository.deleteById(id);
     }
 
     private double calculateTotalPrice(List<OrderItem> items) {
         if (items == null || items.isEmpty()) {
-            throw new IllegalArgumentException("Total price must be non-negative");
+            throw new IllegalArgumentException("Order must contain at least one item");
         }
         return items.stream()
                 .mapToDouble(item -> item.getPriceAtPurchase() * item.getQuantity())

@@ -17,5 +17,5 @@ import java.util.List;
 public class OrderRequestDto {
     private OrderStatus status;
     private long user;
-    List<OrderItem> orderItems;
+    private List<OrderItem> orderItems;
 }
