@@ -5,7 +5,6 @@ import com.dotdot.marketplace.product.dto.ProductResponseDto;
 import com.dotdot.marketplace.product.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,26 +19,22 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity<ProductResponseDto> create(@Valid @RequestBody ProductRequestDto request) {
-        ProductResponseDto response = productService.create(request);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return ResponseEntity.ok(productService.create(request));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponseDto> getById(@PathVariable long id) {
-        ProductResponseDto response = productService.getById(id);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(productService.getById(id));
     }
 
     @GetMapping
     public ResponseEntity<List<ProductResponseDto>> getAll() {
-        List<ProductResponseDto> products = productService.getAll();
-        return ResponseEntity.ok(products);
+        return ResponseEntity.ok(productService.getAll());
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponseDto> update(@PathVariable long id, @Valid @RequestBody ProductRequestDto request) {
-        ProductResponseDto response = productService.update(id, request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(productService.update(id, request));
     }
 
     @DeleteMapping("/{id}")

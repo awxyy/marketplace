@@ -26,8 +26,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponseDto create(ProductRequestDto request) {
-        User seller = userRepository.findById(request.getSellerId())
-                .orElseThrow(() -> new IllegalArgumentException("Seller with ID " + request.getSellerId() + " does not exist"));
+        User seller = userRepository.findById(request.getSellerId()).orElseThrow(() -> new IllegalArgumentException("Seller with ID " + request.getSellerId() + " does not exist"));
 
         Product product = new Product();
         product.setName(request.getName());
