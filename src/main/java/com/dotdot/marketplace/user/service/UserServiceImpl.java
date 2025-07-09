@@ -5,7 +5,6 @@ import com.dotdot.marketplace.user.dto.UserRequestDto;
 import com.dotdot.marketplace.user.dto.UserResponseDto;
 import com.dotdot.marketplace.user.entity.User;
 import com.dotdot.marketplace.user.repository.UserRepository;
-import com.dotdot.marketplace.user.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -24,7 +23,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto createUser(UserRequestDto userRequest) {
         validatePassword(userRequest.getPassword());
-        User user = UserMapper.toEntity(userRequest);
+        User user = modelMapper.map(userRequest,User.class);
 // TODO: Hash password before saving (e.g., BCryptPasswordEncoder)
         user.setCreatedAt(LocalDateTime.now());
         User savedUser = userRepository.save(user);
@@ -41,12 +40,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto updateUser(Long id, UserRequestDto userRequest) {
         User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
-
         validatePassword(userRequest.getPassword());
+        modelMapper.map(userRequest, user);
+        User savedUser = userRepository.save(user);
 
-        User userToUpdate = UserMapper.toEntity(userRequest);
-        user.setCreatedAt(LocalDateTime.now());
-        User savedUser = userRepository.save(userToUpdate);
         return modelMapper.map(savedUser, UserResponseDto.class);
     }
 
