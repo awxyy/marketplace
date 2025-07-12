@@ -7,7 +7,6 @@ import com.dotdot.marketplace.order.dto.OrderRequestDto;
 import com.dotdot.marketplace.order.dto.OrderResponseDto;
 import com.dotdot.marketplace.order.entity.Order;
 import com.dotdot.marketplace.order.entity.OrderStatus;
-import com.dotdot.marketplace.order.mapper.OrderMapper;
 import com.dotdot.marketplace.order.repository.OrderRepository;
 import com.dotdot.marketplace.orderitem.entity.OrderItem;
 import com.dotdot.marketplace.user.entity.User;
@@ -33,7 +32,9 @@ public class OrderServiceImpl implements OrderService {
         User user = userRepository.findById(dto.getUser())
                 .orElseThrow(() -> new UserNotFoundException("User not found "));
 
-        Order order = OrderMapper.mapOrderToEntity(dto, user);
+        Order order = modelMapper.map(dto, Order.class);
+        order.setUser(user);
+
         order.setTotalPrice(calculateTotalPrice(dto.getOrderItems()));
         order.setCreatedAt(LocalDateTime.now());
 
@@ -60,10 +61,10 @@ public class OrderServiceImpl implements OrderService {
         validateStatus(dto.getStatus());
         Order existingOrder = orderRepository.findById(id)
                 .orElseThrow(() -> new OrderNotFoundException("Order not found"));
-        Order order = OrderMapper.updateExistingOrder(dto, existingOrder);
-        order.setTotalPrice(calculateTotalPrice(dto.getOrderItems()));
+        modelMapper.map(dto, existingOrder);
+        existingOrder.setTotalPrice(calculateTotalPrice(dto.getOrderItems()));
 
-        Order savedOrder = orderRepository.save(order);
+        Order savedOrder = orderRepository.save(existingOrder);
         return modelMapper.map(savedOrder, OrderResponseDto.class);
     }
 

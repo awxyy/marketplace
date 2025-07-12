@@ -29,12 +29,16 @@ public class ProductServiceImpl implements ProductService {
         User seller = userRepository.findById(request.getSellerId())
                 .orElseThrow(() -> new IllegalArgumentException("Seller with ID " + request.getSellerId() + " does not exist"));
 
-        Product product = modelMapper.map(request, Product.class);
+        Product product = new Product(); // новий обʼєкт, без id
+        product.setName(request.getName());
+        product.setDescription(request.getDescription());
+        product.setPrice(request.getPrice());
         product.setSeller(seller);
         product.setCreatedAt(LocalDateTime.now());
         product.setStatus(ProductStatus.AVAILABLE);
 
-        return modelMapper.map(productRepository.save(product), ProductResponseDto.class);
+        Product savedProduct = productRepository.save(product);
+        return modelMapper.map(savedProduct, ProductResponseDto.class);
     }
 
     @Override

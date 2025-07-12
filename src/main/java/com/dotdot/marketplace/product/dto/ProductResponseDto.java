@@ -1,6 +1,5 @@
 package com.dotdot.marketplace.product.dto;
 
-import com.dotdot.marketplace.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,7 +17,7 @@ public class ProductResponseDto {
     private String name;
     private String description;
     private double price;
-    private User seller;
+    private Long sellerId;
     private String status;
     private LocalDateTime createdAt;
 
