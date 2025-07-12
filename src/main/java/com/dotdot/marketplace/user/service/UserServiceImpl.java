@@ -23,7 +23,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto createUser(UserRequestDto userRequest) {
         validatePassword(userRequest.getPassword());
-        User user = modelMapper.map(userRequest,User.class);
+        User user = modelMapper.map(userRequest, User.class);
 // TODO: Hash password before saving (e.g., BCryptPasswordEncoder)
         user.setCreatedAt(LocalDateTime.now());
         User savedUser = userRepository.save(user);
