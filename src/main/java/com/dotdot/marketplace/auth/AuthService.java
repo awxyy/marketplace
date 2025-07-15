@@ -1,8 +1,9 @@
-package com.dotdot.marketplace.jwt.service;
+package com.dotdot.marketplace.auth;
 
-import com.dotdot.marketplace.jwt.dto.AuthenticationRequest;
-import com.dotdot.marketplace.jwt.dto.AuthenticationResponse;
-import com.dotdot.marketplace.jwt.dto.RegisterRequest;
+import com.dotdot.marketplace.auth.dto.AuthRequestDto;
+import com.dotdot.marketplace.auth.dto.AuthResponseDto;
+import com.dotdot.marketplace.auth.dto.RegisterRequest;
+import com.dotdot.marketplace.auth.service.JwtProvider;
 import com.dotdot.marketplace.user.entity.User;
 import com.dotdot.marketplace.user.entity.UserRole;
 import com.dotdot.marketplace.user.repository.UserRepository;
@@ -17,14 +18,14 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
-public class AuthenticationService {
+public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
+    private final JwtProvider jwtService;
     private final AuthenticationManager authenticationManager;
 
-    public AuthenticationResponse register(RegisterRequest request) {
+    public AuthResponseDto register(RegisterRequest request) {
         if (userRepository.existsByLogin(request.getLogin())) {
             throw new RuntimeException("Login already exists");
         }
@@ -38,14 +39,34 @@ public class AuthenticationService {
         userRepository.save(user);
 
         var jwtToken = jwtService.generateToken(user);
-        return AuthenticationResponse.builder().token(jwtToken).build();
+        return AuthResponseDto.builder().token(jwtToken).build();
     }
 
-    public AuthenticationResponse authentication(AuthenticationRequest request) {
+    public AuthResponseDto authentication(AuthRequestDto request) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getLogin(), request.getPassword()));
         var user = userRepository.findByLogin(request.getLogin())
                 .orElseThrow(() -> new UsernameNotFoundException(request.getLogin()));
         var jwtToken = jwtService.generateToken(user);
-        return AuthenticationResponse.builder().token(jwtToken).build();
+        return AuthResponseDto.builder().token(jwtToken).build();
     }
+
+    public AuthResponseDto refreshToken(String refreshToken) {
+        String login;
+        try {
+            login = jwtService.extractUsername(refreshToken);
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid refresh token");
+        }
+
+        var user = userRepository.findByLogin(login)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        String newAccessToken = jwtService.generateToken(user);
+
+        return AuthResponseDto.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
 }

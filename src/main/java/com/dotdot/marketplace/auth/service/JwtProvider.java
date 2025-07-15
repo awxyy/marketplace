@@ -1,11 +1,13 @@
-package com.dotdot.marketplace.jwt.service;
+package com.dotdot.marketplace.auth.service;
 
 
+import com.dotdot.marketplace.configuration.jwt.JwtProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -16,9 +18,11 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Service
-public class JwtService {
+@RequiredArgsConstructor
+public class JwtProvider {
 
-    private static final String SECRET_KEY = "yO1Zm6nvzSnt2E2j9Y4WxRYb1d8Xq3tPL5jJwDlQ/3Y=";
+    private final JwtProperties jwtProperties;
+
 
     public String extractUsername(String token) {
         return extractClaims(token, Claims::getSubject);
@@ -66,7 +70,7 @@ public class JwtService {
     }
 
     private SecretKey getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        byte[] keyBytes = Decoders.BASE64.decode(jwtProperties.getSecret());
         return Keys.hmacShaKeyFor(keyBytes);
     }
 

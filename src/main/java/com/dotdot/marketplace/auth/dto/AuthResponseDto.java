@@ -1,4 +1,4 @@
-package com.dotdot.marketplace.jwt.dto;
+package com.dotdot.marketplace.auth.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticationResponse {
+public class AuthResponseDto {
     private String token;
     private String accessToken;
     private String refreshToken;

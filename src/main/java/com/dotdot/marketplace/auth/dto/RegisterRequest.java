@@ -1,4 +1,4 @@
-package com.dotdot.marketplace.jwt.dto;
+package com.dotdot.marketplace.auth.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RefreshTokenRequest {
-    public String RefreshToken;
+public class RegisterRequest {
+    private String login;
+    private String password;
+    private String fullName;
 }
