@@ -1,4 +1,4 @@
-package com.dotdot.marketplace.auth.service;
+package com.dotdot.marketplace.user.security;
 
 import com.dotdot.marketplace.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -9,13 +9,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class UserDetailsServiceImpl implements UserDetailsService {
+public class UserPrincipalService implements UserDetailsService {
 
     private final UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByLogin(username)
+                .map(UserPrincipal::new)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
     }
 }

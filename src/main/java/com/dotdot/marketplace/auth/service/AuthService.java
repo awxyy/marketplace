@@ -1,9 +1,9 @@
-package com.dotdot.marketplace.auth;
+package com.dotdot.marketplace.auth.service;
 
 import com.dotdot.marketplace.auth.dto.AuthRequestDto;
 import com.dotdot.marketplace.auth.dto.AuthResponseDto;
 import com.dotdot.marketplace.auth.dto.RegisterRequest;
-import com.dotdot.marketplace.auth.service.JwtProvider;
+import com.dotdot.marketplace.configuration.jwt.JwtProvider;
 import com.dotdot.marketplace.user.entity.User;
 import com.dotdot.marketplace.user.entity.UserRole;
 import com.dotdot.marketplace.user.repository.UserRepository;
@@ -13,7 +13,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
+import com.dotdot.marketplace.user.security.UserPrincipal;
 import java.time.LocalDateTime;
 
 @Service
@@ -38,16 +38,16 @@ public class AuthService {
                 .build();
         userRepository.save(user);
 
-        var jwtToken = jwtService.generateToken(user);
-        return AuthResponseDto.builder().token(jwtToken).build();
+        var jwtToken = jwtService.generateToken(new UserPrincipal(user));
+        return AuthResponseDto.builder().accessToken(jwtToken).build();
     }
 
-    public AuthResponseDto authentication(AuthRequestDto request) {
+    public AuthResponseDto login(AuthRequestDto request) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getLogin(), request.getPassword()));
         var user = userRepository.findByLogin(request.getLogin())
                 .orElseThrow(() -> new UsernameNotFoundException(request.getLogin()));
-        var jwtToken = jwtService.generateToken(user);
-        return AuthResponseDto.builder().token(jwtToken).build();
+        var jwtToken = jwtService.generateToken(new UserPrincipal(user));
+        return AuthResponseDto.builder().accessToken(jwtToken).build();
     }
 
     public AuthResponseDto refreshToken(String refreshToken) {
@@ -61,7 +61,7 @@ public class AuthService {
         var user = userRepository.findByLogin(login)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        String newAccessToken = jwtService.generateToken(user);
+        String newAccessToken = jwtService.generateToken(new UserPrincipal(user));
 
         return AuthResponseDto.builder()
                 .accessToken(newAccessToken)

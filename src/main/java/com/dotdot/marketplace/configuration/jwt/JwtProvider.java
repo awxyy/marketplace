@@ -1,7 +1,6 @@
-package com.dotdot.marketplace.auth.service;
+package com.dotdot.marketplace.configuration.jwt;
 
 
-import com.dotdot.marketplace.configuration.jwt.JwtProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;

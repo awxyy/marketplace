@@ -4,6 +4,7 @@ import com.dotdot.marketplace.auth.dto.AuthRequestDto;
 import com.dotdot.marketplace.auth.dto.AuthResponseDto;
 import com.dotdot.marketplace.auth.dto.RefreshTokenDto;
 import com.dotdot.marketplace.auth.dto.RegisterRequest;
+import com.dotdot.marketplace.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,11 +27,11 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDto> login(@RequestBody AuthRequestDto request) {
-        return ResponseEntity.ok(authService.authentication(request));
+        return ResponseEntity.ok(authService.login(request));
     }
 
     @PostMapping("/login/access-token")
-    public ResponseEntity<?> access(@RequestBody RefreshTokenDto request) {
+    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenDto request) {
         try {
             AuthResponseDto response = authService.refreshToken(request.getRefreshToken());
             return ResponseEntity.ok(response);

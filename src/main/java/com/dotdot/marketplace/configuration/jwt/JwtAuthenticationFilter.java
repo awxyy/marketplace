@@ -1,6 +1,5 @@
 package com.dotdot.marketplace.configuration.jwt;
 
-import com.dotdot.marketplace.auth.service.JwtProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
