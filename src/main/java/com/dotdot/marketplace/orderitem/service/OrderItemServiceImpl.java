@@ -1,6 +1,5 @@
 package com.dotdot.marketplace.orderitem.service;
 
-import com.dotdot.marketplace.order.dto.OrderResponseDto;
 import com.dotdot.marketplace.order.entity.Order;
 import com.dotdot.marketplace.order.repository.OrderRepository;
 import com.dotdot.marketplace.orderitem.dto.OrderItemRequestDto;
@@ -42,9 +41,7 @@ public class OrderItemServiceImpl implements OrderItemService {
 
         OrderItem savedOrderItem = orderItemRepository.save(orderItem);
 
-
         return modelMapper.map(savedOrderItem, OrderItemResponseDto.class);
-
     }
 
     @Override
@@ -78,6 +75,5 @@ public class OrderItemServiceImpl implements OrderItemService {
         }
         orderItemRepository.deleteById(id);
     }
-
 
 }
