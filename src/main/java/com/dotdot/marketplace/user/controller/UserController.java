@@ -1,6 +1,5 @@
 package com.dotdot.marketplace.user.controller;
 
-
 import com.dotdot.marketplace.user.dto.UserRequestDto;
 import com.dotdot.marketplace.user.dto.UserResponseDto;
 import com.dotdot.marketplace.user.service.UserServiceImpl;
