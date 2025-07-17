@@ -30,12 +30,17 @@ dependencies {
     implementation 'org.flywaydb:flyway-database-postgresql'
     implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
     implementation 'org.modelmapper:modelmapper:3.1.1'
+    implementation("io.jsonwebtoken:jjwt-api:0.12.6")
+    implementation "org.springframework.security:spring-security-web"
+    implementation "org.springframework.security:spring-security-config"
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 }
 
 tasks.named('test') {
