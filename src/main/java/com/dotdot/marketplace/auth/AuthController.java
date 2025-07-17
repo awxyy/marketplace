@@ -6,7 +6,6 @@ import com.dotdot.marketplace.auth.dto.RefreshTokenDto;
 import com.dotdot.marketplace.auth.dto.RegisterRequest;
 import com.dotdot.marketplace.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,11 +31,6 @@ public class AuthController {
 
     @PostMapping("/login/access-token")
     public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenDto request) {
-        try {
-            AuthResponseDto response = authService.refreshToken(request.getRefreshToken());
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
-        }
+        return ResponseEntity.ok(authService.refreshToken(request.getRefreshToken()));
     }
 }

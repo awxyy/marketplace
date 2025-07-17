@@ -4,16 +4,18 @@ import com.dotdot.marketplace.auth.dto.AuthRequestDto;
 import com.dotdot.marketplace.auth.dto.AuthResponseDto;
 import com.dotdot.marketplace.auth.dto.RegisterRequest;
 import com.dotdot.marketplace.configuration.jwt.JwtProvider;
+import com.dotdot.marketplace.exception.InvalidRefreshTokenException;
 import com.dotdot.marketplace.user.entity.User;
 import com.dotdot.marketplace.user.entity.UserRole;
 import com.dotdot.marketplace.user.repository.UserRepository;
+import com.dotdot.marketplace.user.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.dotdot.marketplace.user.security.UserPrincipal;
+
 import java.time.LocalDateTime;
 
 @Service
@@ -22,7 +24,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtProvider jwtService;
+    private final JwtProvider jwtProvider;
     private final AuthenticationManager authenticationManager;
 
     public AuthResponseDto register(RegisterRequest request) {
@@ -38,7 +40,7 @@ public class AuthService {
                 .build();
         userRepository.save(user);
 
-        var jwtToken = jwtService.generateToken(new UserPrincipal(user));
+        var jwtToken = jwtProvider.generateToken(new UserPrincipal(user));
         return AuthResponseDto.builder().accessToken(jwtToken).build();
     }
 
@@ -46,14 +48,14 @@ public class AuthService {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getLogin(), request.getPassword()));
         var user = userRepository.findByLogin(request.getLogin())
                 .orElseThrow(() -> new UsernameNotFoundException(request.getLogin()));
-        var jwtToken = jwtService.generateToken(new UserPrincipal(user));
+        var jwtToken = jwtProvider.generateToken(new UserPrincipal(user));
         return AuthResponseDto.builder().accessToken(jwtToken).build();
     }
 
     public AuthResponseDto refreshToken(String refreshToken) {
         String login;
         try {
-            login = jwtService.extractUsername(refreshToken);
+            login = jwtProvider.extractUsername(refreshToken);
         } catch (Exception e) {
             throw new RuntimeException("Invalid refresh token");
         }
@@ -61,7 +63,11 @@ public class AuthService {
         var user = userRepository.findByLogin(login)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        String newAccessToken = jwtService.generateToken(new UserPrincipal(user));
+        if (!jwtProvider.validateToken(refreshToken, new UserPrincipal(user))) {
+            throw new InvalidRefreshTokenException("Invalid refresh token");
+        }
+
+        String newAccessToken = jwtProvider.generateToken(new UserPrincipal(user));
 
         return AuthResponseDto.builder()
                 .accessToken(newAccessToken)
