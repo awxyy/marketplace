@@ -27,7 +27,7 @@ public class JwtProvider {
         return extractClaims(token, Claims::getSubject);
     }
 
-    private <T> T extractClaims(String token, Function<Claims, T> claimsResolver) {
+    public <T> T extractClaims(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
@@ -41,6 +41,7 @@ public class JwtProvider {
 
         Map<String, Object> claims = new HashMap<>(extraClaims);
         claims.put("sub", userDetails.getUsername());
+        claims.put("role", "ROLE_USER");
         claims.put("iat", new Date(now));
         claims.put("exp", new Date(now + 1000 * 60 * 60 * 24));
 
@@ -63,7 +64,7 @@ public class JwtProvider {
         return extractClaims(token, Claims::getExpiration);
     }
 
-    private Claims extractAllClaims(String token) {
+    public Claims extractAllClaims(String token) {
         JwtParser parser = Jwts.parser().verifyWith(getSigningKey()).build();
         return parser.parseSignedClaims(token).getPayload();
     }

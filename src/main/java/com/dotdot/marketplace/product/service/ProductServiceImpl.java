@@ -10,6 +10,9 @@ import com.dotdot.marketplace.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -25,11 +28,12 @@ public class ProductServiceImpl implements ProductService {
     private final ModelMapper modelMapper;
 
     @Override
+    @CacheEvict(value = "productList", allEntries = true)
     public ProductResponseDto create(ProductRequestDto request) {
         User seller = userRepository.findById(request.getSellerId())
                 .orElseThrow(() -> new IllegalArgumentException("Seller with ID " + request.getSellerId() + " does not exist"));
 
-        Product product = new Product(); // новий обʼєкт, без id
+        Product product = new Product();
         product.setName(request.getName());
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
@@ -42,6 +46,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(value = "productDetails", key = "#id")
     public ProductResponseDto getById(long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Product with ID " + id + " not found"));
@@ -50,6 +55,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(value = "productList")
     public List<ProductResponseDto> getAll() {
         return productRepository.findAll()
                 .stream()
@@ -58,6 +64,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "productList", allEntries = true),
+            @CacheEvict(value = "productDetails", key = "#id")
+    })
     public ProductResponseDto update(long id, ProductRequestDto request) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Product with ID " + id + " not found"));
@@ -75,6 +85,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "productList", allEntries = true),
+            @CacheEvict(value = "productDetails", key = "#id")
+    })
     public void delete(long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Product with ID " + id + " not found"));
