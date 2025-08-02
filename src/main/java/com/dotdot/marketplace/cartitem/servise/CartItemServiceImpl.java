@@ -13,7 +13,6 @@ import com.dotdot.marketplace.user.entity.User;
 import com.dotdot.marketplace.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -31,7 +30,6 @@ public class CartItemServiceImpl implements CartItemService {
     private final ModelMapper modelMapper;
     private final UserRepository userRepository;
     private  final ProductRepository productRepository;
-    private final CacheManager cacheManager;
 
     @Override
     @CacheEvict(value = "userCartItems", key = "#dto.userId")
@@ -70,7 +68,7 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     @CacheEvict(value = "userCartItems", key = "#dto.userId")
-    public CartItemResponseDto changeQuantityByCartItemId(CartItemRequestDto dto, long id) {
+    public CartItemResponseDto updateQuantityByCartItemId(CartItemRequestDto dto, long id) {
         CartItem cartItem = cartItemRepository.findById(id)
                 .orElseThrow(() -> new CartItemNotFoundException("CartItem not found"));
         cartItem.setQuantity(dto.getQuantity());
@@ -80,19 +78,15 @@ public class CartItemServiceImpl implements CartItemService {
 
 
     @Override
-    public void deleteCartItemById(Long id) {
+    @CacheEvict(value = "userCartItems", key = "#userId")
+    public void deleteCartItemById(Long id, Long userId) {
         CartItem cartItem = cartItemRepository.findById(id)
                 .orElseThrow(() -> new CartItemNotFoundException("CartItem not found"));
-        Long userId = cartItem.getUser().getId();
-        clearUserCartCache(userId);
+        if (cartItem.getUser().getId() != userId) {
+            throw new IllegalArgumentException("CartItem does not belong to this user");
+        }
         cartItemRepository.deleteById(id);
     }
 
-    private void clearUserCartCache(Long userId) {
-        var cache = cacheManager.getCache("userCartItems");
-        if (cache != null) {
-            cache.evict(userId);
-        }
-    }
 
 }
