@@ -1,10 +1,12 @@
 package com.dotdot.marketplace.product.controller;
 
+import com.dotdot.marketplace.product.dto.ProductFilterRequest;
 import com.dotdot.marketplace.product.dto.ProductRequestDto;
 import com.dotdot.marketplace.product.dto.ProductResponseDto;
 import com.dotdot.marketplace.product.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,5 +43,10 @@ public class ProductController {
     public ResponseEntity<Void> delete(@PathVariable long id) {
         productService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/filter")
+    public ResponseEntity<Page<ProductResponseDto>> filter(@RequestBody ProductFilterRequest filterRequest) {
+        return ResponseEntity.ok(productService.filterProducts(filterRequest));
     }
 }

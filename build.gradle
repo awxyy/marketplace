@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.3'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.flywaydb.flyway' version '9.22.3'
 }
 
 group = 'com.dotdot'
@@ -24,6 +25,7 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.flywaydb:flyway-core'
@@ -45,4 +47,10 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+flyway {
+    url = System.getenv('SPRING_DATASOURCE_URL')
+    user = System.getenv('SPRING_DATASOURCE_USERNAME')
+    password = System.getenv('SPRING_DATASOURCE_PASSWORD')
 }
