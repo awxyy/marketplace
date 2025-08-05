@@ -17,7 +17,7 @@ import java.time.Duration;
 @EnableCaching
 public class RedisConfig {
 
-    @Value("${spring.cache.redis.time-to-live:600000}")
+    @Value("${spring.cache.redis.time-to-live}")
     private long ttlMillis;
 
     @Bean
