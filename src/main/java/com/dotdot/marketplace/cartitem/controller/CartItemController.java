@@ -32,12 +32,12 @@ public class CartItemController {
 
     @PutMapping("/{id}")
     public ResponseEntity<CartItemResponseDto> updateCartItem(@PathVariable Long id, @RequestBody CartItemRequestDto dto) {
-        return ResponseEntity.ok(cartItemService.changeQuantityByCartItemId(dto, id));
+        return ResponseEntity.ok(cartItemService.updateQuantityByCartItemId(dto, id));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCartItem(@PathVariable Long id) {
-        cartItemService.deleteCartItemById(id);
+    public ResponseEntity<Void> deleteCartItem(@PathVariable Long id, @RequestParam Long userId) {
+        cartItemService.deleteCartItemById(id, userId);
         return ResponseEntity.noContent().build();
     }
 }

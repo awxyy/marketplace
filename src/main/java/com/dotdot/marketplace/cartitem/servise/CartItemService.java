@@ -9,6 +9,6 @@ public interface CartItemService {
     CartItemResponseDto addProductToCart(CartItemRequestDto dto);
     CartItemResponseDto getCartItemById(Long id);
     List<CartItemResponseDto> getAllCartItemByUserId(long userId);
-    CartItemResponseDto changeQuantityByCartItemId(CartItemRequestDto dto, long id);
-    void deleteCartItemById(Long id);
+    CartItemResponseDto updateQuantityByCartItemId(CartItemRequestDto dto, long id);
+    void deleteCartItemById(Long id, Long userId);
 }
