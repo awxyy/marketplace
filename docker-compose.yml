@@ -25,6 +25,7 @@ services:
 
 volumes:
   postgres_data:
+  redis-data:
 
 networks:
   marketplace-net:
