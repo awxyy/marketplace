@@ -1,7 +1,7 @@
 package com.dotdot.marketplace.order.dto;
 
 import com.dotdot.marketplace.order.entity.OrderStatus;
-import com.dotdot.marketplace.orderitem.entity.OrderItem;
+import com.dotdot.marketplace.orderitem.dto.OrderItemRequestDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,5 +17,5 @@ import java.util.List;
 public class OrderRequestDto {
     private OrderStatus status;
     private long user;
-    private List<OrderItem> orderItems;
+    private List<OrderItemRequestDto> orderItems;
 }
