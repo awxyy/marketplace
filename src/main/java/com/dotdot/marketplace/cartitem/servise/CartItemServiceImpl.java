@@ -13,6 +13,8 @@ import com.dotdot.marketplace.user.entity.User;
 import com.dotdot.marketplace.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -30,6 +32,7 @@ public class CartItemServiceImpl implements CartItemService {
     private  final ProductRepository productRepository;
 
     @Override
+    @CacheEvict(value = "userCartItems", key = "#dto.userId")
     public CartItemResponseDto addProductToCart(CartItemRequestDto dto) {
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
@@ -54,6 +57,7 @@ public class CartItemServiceImpl implements CartItemService {
     }
 
     @Override
+    @Cacheable(value = "userCartItems", key = "#userId")
     public List<CartItemResponseDto> getAllCartItemByUserId(long userId) {
         List<CartItem> cartItems = cartItemRepository.findAllByUserId(userId);
 
@@ -63,7 +67,8 @@ public class CartItemServiceImpl implements CartItemService {
     }
 
     @Override
-    public CartItemResponseDto changeQuantityByCartItemId(CartItemRequestDto dto, long id) {
+    @CacheEvict(value = "userCartItems", key = "#dto.userId")
+    public CartItemResponseDto updateQuantityByCartItemId(CartItemRequestDto dto, long id) {
         CartItem cartItem = cartItemRepository.findById(id)
                 .orElseThrow(() -> new CartItemNotFoundException("CartItem not found"));
         cartItem.setQuantity(dto.getQuantity());
@@ -71,11 +76,16 @@ public class CartItemServiceImpl implements CartItemService {
         return modelMapper.map(saved, CartItemResponseDto.class);
     }
 
+
     @Override
-    public void deleteCartItemById(Long id) {
-        if (!cartItemRepository.existsById(id)) {
-            throw new CartItemNotFoundException("CartItem not found");
+    @CacheEvict(value = "userCartItems", key = "#userId")
+    public void deleteCartItemById(Long id, Long userId) {
+        CartItem cartItem = cartItemRepository.findById(id)
+                .orElseThrow(() -> new CartItemNotFoundException("CartItem not found"));
+        if (cartItem.getUser().getId() != userId) {
+            throw new IllegalArgumentException("CartItem does not belong to this user");
         }
         cartItemRepository.deleteById(id);
     }
+
 }
