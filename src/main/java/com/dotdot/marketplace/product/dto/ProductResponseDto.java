@@ -20,5 +20,4 @@ public class ProductResponseDto {
     private Long sellerId;
     private String status;
     private LocalDateTime createdAt;
-
 }

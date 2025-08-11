@@ -1,13 +1,16 @@
 package com.dotdot.marketplace.product.controller;
 
+import com.dotdot.marketplace.product.dto.ProductFilterRequest;
 import com.dotdot.marketplace.product.dto.ProductRequestDto;
 import com.dotdot.marketplace.product.dto.ProductResponseDto;
 import com.dotdot.marketplace.product.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -41,5 +44,22 @@ public class ProductController {
     public ResponseEntity<Void> delete(@PathVariable long id) {
         productService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<Page<ProductResponseDto>> filter(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        ProductFilterRequest filterRequest = new ProductFilterRequest();
+        filterRequest.setName(name);
+        filterRequest.setMinPrice(minPrice);
+        filterRequest.setMaxPrice(maxPrice);
+        filterRequest.setPage(page);
+        filterRequest.setSize(size);
+        return ResponseEntity.ok(productService.filterProducts(filterRequest));
     }
 }

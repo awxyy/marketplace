@@ -1,15 +1,22 @@
 package com.dotdot.marketplace.product.service;
 
+import com.dotdot.marketplace.product.dto.ProductFilterRequest;
 import com.dotdot.marketplace.product.dto.ProductRequestDto;
 import com.dotdot.marketplace.product.dto.ProductResponseDto;
 import com.dotdot.marketplace.product.entity.Product;
 import com.dotdot.marketplace.product.entity.ProductStatus;
 import com.dotdot.marketplace.product.repository.ProductRepository;
+import com.dotdot.marketplace.product.spec.ProductSpecification;
 import com.dotdot.marketplace.user.entity.User;
 import com.dotdot.marketplace.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -93,6 +100,19 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Product with ID " + id + " not found"));
         productRepository.delete(product);
+    }
+
+    public Page<ProductResponseDto> filterProducts(ProductFilterRequest filterRequest) {
+        Specification<Product> spec = ProductSpecification.withFilters(filterRequest);
+
+        Pageable pageable = PageRequest.of(
+                filterRequest.getPage(),
+                filterRequest.getSize(),
+                Sort.by(Sort.Direction.fromString(filterRequest.getDirection()), filterRequest.getSortBy())
+        );
+
+        Page<Product> products = productRepository.findAll(spec, pageable);
+        return products.map(product -> modelMapper.map(product, ProductResponseDto.class));
     }
 
 }
