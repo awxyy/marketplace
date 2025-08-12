@@ -27,13 +27,14 @@ class OrderServiceTest extends Specification {
         given:
         def userId = 1L
         def productId = 2L
-        def orderRequest = new OrderRequestDto(
-                user: userId,
-                status: OrderStatus.PENDING,
-                orderItems: [
+        def orderRequest = OrderRequestDto.builder()
+                .withUser(userId)
+                .withStatus(OrderStatus.PENDING)
+                .withOrderItems([
                         new OrderItemRequestDto(productId: productId, quantity: 2)
-                ]
-        )
+                ])
+                .build()
+
         def user = new User(id: userId)
         def product = new Product(id: productId, price: 50.0)
         def savedOrder = new Order(id: 1L, totalPrice: 100.0, status: OrderStatus.PENDING, createdAt: LocalDateTime.now(), user: user)
@@ -232,16 +233,10 @@ class OrderServiceTest extends Specification {
         thrown(RuntimeException)
     }
 
-    def "deleteOrder should delete an order"() {
+    def "deleteOrder should delete an order"()  {
         given:
         def orderId = 1L
-        def existingOrder = new Order(id: orderId,
-                status: OrderStatus.PENDING,
-                createdAt: LocalDateTime.now(),
-                user: new User(id: 1L),
-                orderItems: []
-        )
-        orderRepository.existsById(orderId) >> Optional.of(existingOrder)
+        orderRepository.existsById(orderId) >> Optional.of(true)
 
         when:
         orderService.deleteOrderById(orderId)
@@ -252,7 +247,7 @@ class OrderServiceTest extends Specification {
     def "deleteOrder should throw exception if order does not exist"() {
         given:
         def orderId = 99L
-        orderRepository.existsById(orderId) >> Optional.empty()
+        orderRepository.existsById(orderId) >> false
 
         when:
         orderService.deleteOrderById(orderId)
@@ -275,7 +270,7 @@ class OrderServiceTest extends Specification {
         totalPrice == 130.0d
     }
 
-    def "calculateTotalPrice should thrown IllegalArgumentException"() {
+    def "calculateTotalPrice should throw IllegalArgumentException"() {
         given:
         def orderItems = []
 

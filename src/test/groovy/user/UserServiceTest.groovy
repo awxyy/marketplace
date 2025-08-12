@@ -70,7 +70,7 @@ class UserServiceTest extends Specification {
 
     }
 
-    def "getUserById  when dont exist"() {
+    def "getUserById  when doesn't exist"() {
         given:
         def userId = 9999l
 
@@ -136,7 +136,7 @@ class UserServiceTest extends Specification {
         def userId = 1
         def user = new User()
         user.setId(userId)
-        userRepository.existsById(userId) >> Optional.of(user)
+        userRepository.existsById(userId) >> Optional.of(true)
 
         when:
         userService.deleteUser(userId)

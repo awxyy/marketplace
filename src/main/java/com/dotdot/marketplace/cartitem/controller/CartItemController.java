@@ -5,6 +5,7 @@ import com.dotdot.marketplace.cartitem.dto.CartItemResponseDto;
 import com.dotdot.marketplace.cartitem.servise.CartItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,7 +37,9 @@ public class CartItemController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCartItem(@PathVariable Long id, @RequestParam Long userId) {
+    public ResponseEntity<Void> deleteCartItem(@PathVariable Long id, Authentication authentication) {
+        Object principal = authentication.getPrincipal();
+        Long userId = principal instanceof Long ? (Long) principal : null;
         cartItemService.deleteCartItemById(id, userId);
         return ResponseEntity.noContent().build();
     }
