@@ -1,10 +1,13 @@
 package com.dotdot.marketplace.product.entity;
 
+import com.dotdot.marketplace.review.entity.Review;
 import com.dotdot.marketplace.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -33,5 +36,8 @@ public class Product {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews = new ArrayList<>();
 
 }

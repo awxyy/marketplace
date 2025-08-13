@@ -38,7 +38,6 @@ public class JwtProvider {
         return generateToken(extraClaims, userPrincipal.getId(), userPrincipal.getUsername());
     }
 
-
     public String generateToken(Map<String, Object> extraClaims, Long userId, String username) {
         long now = System.currentTimeMillis();
 
