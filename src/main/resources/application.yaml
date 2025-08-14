@@ -27,7 +27,7 @@ spring:
 
   cache:
     redis:
-      time-to-live: 600000
+      time-to-live: 10m
 
 server:
   port: 8080
