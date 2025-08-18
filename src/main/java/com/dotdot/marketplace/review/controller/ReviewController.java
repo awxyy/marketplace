@@ -1,5 +1,4 @@
 package com.dotdot.marketplace.review.controller;
-
 import com.dotdot.marketplace.review.dto.ReviewRequestDto;
 import com.dotdot.marketplace.review.dto.ReviewResponseDto;
 import com.dotdot.marketplace.review.service.ReviewService;
@@ -19,7 +18,7 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @PostMapping
-    public ResponseEntity<ReviewResponseDto> addReview(@RequestBody @Valid  ReviewRequestDto request) {
+    public ResponseEntity<ReviewResponseDto> addReview(@RequestBody @Valid ReviewRequestDto request) {
         return ResponseEntity.ok(reviewService.addReview(request));
     }
 
@@ -47,3 +46,4 @@ public class ReviewController {
         return ResponseEntity.ok(stats);
     }
 }
+

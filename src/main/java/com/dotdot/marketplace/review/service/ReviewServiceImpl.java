@@ -33,7 +33,7 @@ public class ReviewServiceImpl implements ReviewService {
         }
 
         Product product = productRepository.findById(reviewRequestDto.getProductId())
-                .orElseThrow(() -> new IllegalArgumentException("Product not found with ID: "));
+                .orElseThrow(() -> new IllegalArgumentException("Product not found with ID: "+ reviewRequestDto.getProductId()));
 
         User user = userRepository.findById(reviewRequestDto.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -69,7 +69,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public ReviewResponseDto updateReview(ReviewRequestDto reviewRequestDto,long reviewId) {
+    public ReviewResponseDto updateReview(ReviewRequestDto reviewRequestDto, long reviewId) {
         if(reviewRequestDto.getRating() < 1 || reviewRequestDto.getRating() > 5) {
             throw new IllegalArgumentException("Rating must be between 1 and 5");
         }
