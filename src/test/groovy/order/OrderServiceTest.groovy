@@ -233,7 +233,7 @@ class OrderServiceTest extends Specification {
         thrown(RuntimeException)
     }
 
-    def "deleteOrder should delete an order"()  {
+    def "deleteOrder should delete an order"() {
         given:
         def orderId = 1L
         orderRepository.existsById(orderId) >> Optional.of(true)
