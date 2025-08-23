@@ -2,7 +2,6 @@ package com.dotdot.marketplace.product.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,8 +20,5 @@ public class ProductRequestDto {
 
     @Min(value = 1, message = "Price must be greater than 0")
     private double price;
-
-    @NotNull(message = "sellerId required")
-    private Long sellerId;
 
 }

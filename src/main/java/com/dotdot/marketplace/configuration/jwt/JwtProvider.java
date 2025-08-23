@@ -7,6 +7,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +42,9 @@ public class JwtProvider {
 
         Map<String, Object> claims = new HashMap<>(extraClaims);
         claims.put("sub", userDetails.getUsername());
-        claims.put("role", "ROLE_USER");
+        claims.put("roles", userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList());
         claims.put("iat", new Date(now));
         claims.put("exp", new Date(now + 1000 * 60 * 60 * 24));
 

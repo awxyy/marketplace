@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-
     private final ModelMapper modelMapper;
 
     @Override
@@ -33,13 +32,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto getUserById(Long id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
         return modelMapper.map(user, UserResponseDto.class);
     }
 
     @Override
     public UserResponseDto updateUser(Long id, UserRequestDto userRequest) {
-        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
         validatePassword(userRequest.getPassword());
         modelMapper.map(userRequest, user);
         User savedUser = userRepository.save(user);
@@ -61,4 +62,10 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public User findByLogin(String login) {
+        return userRepository.findByLogin(login)
+                .orElseThrow(() -> new UserNotFoundException("User not found with login: " + login));
+
+    }
 }

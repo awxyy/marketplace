@@ -1,5 +1,6 @@
 package com.dotdot.marketplace.product.service;
 
+import com.dotdot.marketplace.exception.UnauthorizedException;
 import com.dotdot.marketplace.product.dto.ProductFilterRequest;
 import com.dotdot.marketplace.product.dto.ProductRequestDto;
 import com.dotdot.marketplace.product.dto.ProductResponseDto;
@@ -8,7 +9,10 @@ import com.dotdot.marketplace.product.entity.ProductStatus;
 import com.dotdot.marketplace.product.repository.ProductRepository;
 import com.dotdot.marketplace.product.spec.ProductSpecification;
 import com.dotdot.marketplace.user.entity.User;
+import com.dotdot.marketplace.user.entity.UserRole;
 import com.dotdot.marketplace.user.repository.UserRepository;
+import com.dotdot.marketplace.user.security.UserDetailsServiceImpl;
+import com.dotdot.marketplace.user.security.UserPrincipal;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -20,6 +24,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -33,18 +39,23 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final UserDetailsServiceImpl userDetailsService;
 
     @Override
     @CacheEvict(value = "productList", allEntries = true)
     public ProductResponseDto create(ProductRequestDto request) {
-        User seller = userRepository.findById(request.getSellerId())
-                .orElseThrow(() -> new IllegalArgumentException("Seller with ID " + request.getSellerId() + " does not exist"));
+        if (!userDetailsService.hasRole(UserRole.SELLER)) {
+            throw new UnauthorizedException("Only users with SELLER status can create products");
+        }
+
+        User currentUser = userRepository.findById(getCurrentUserId())
+                .orElseThrow(() -> new EntityNotFoundException("Current user not found"));
 
         Product product = new Product();
         product.setName(request.getName());
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
-        product.setSeller(seller);
+        product.setSeller(currentUser);
         product.setCreatedAt(LocalDateTime.now());
         product.setStatus(ProductStatus.AVAILABLE);
 
@@ -76,16 +87,25 @@ public class ProductServiceImpl implements ProductService {
             @CacheEvict(value = "productDetails", key = "#id")
     })
     public ProductResponseDto update(long id, ProductRequestDto request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        User currentUser = userPrincipal.getUser();
+
+        if (!currentUser.getRoles().contains(UserRole.SELLER)) {
+            throw new UnauthorizedException("Only users with SELLER status can update products");
+        }
+
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Product with ID " + id + " not found"));
 
-        User seller = userRepository.findById(request.getSellerId())
-                .orElseThrow(() -> new IllegalArgumentException("Seller with ID " + request.getSellerId() + " does not exist"));
+
+        if (product.getSeller().getId() !=     currentUser.getId()) {
+            throw new UnauthorizedException("You can only update your own products");
+        }
 
         product.setName(request.getName());
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
-        product.setSeller(seller);
         Product updatedProduct = productRepository.save(product);
 
         return modelMapper.map(updatedProduct, ProductResponseDto.class);
@@ -97,8 +117,21 @@ public class ProductServiceImpl implements ProductService {
             @CacheEvict(value = "productDetails", key = "#id")
     })
     public void delete(long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        User currentUser = userPrincipal.getUser();
+
+        if (!currentUser.getRoles().contains(UserRole.SELLER)) {
+            throw new UnauthorizedException("Only users with SELLER status can delete products");
+        }
+
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Product with ID " + id + " not found"));
+
+        if (product.getSeller().getId() !=  currentUser.getId()) {
+            throw new UnauthorizedException("You can only delete your own products");
+        }
+
         productRepository.delete(product);
     }
 
@@ -113,6 +146,10 @@ public class ProductServiceImpl implements ProductService {
 
         Page<Product> products = productRepository.findAll(spec, pageable);
         return products.map(product -> modelMapper.map(product, ProductResponseDto.class));
+    }
+
+    private Long getCurrentUserId() {
+        return userDetailsService.getCurrentUserId();
     }
 
 }
