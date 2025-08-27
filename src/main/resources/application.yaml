@@ -1,3 +1,7 @@
+app:
+  reservation:
+    ttl-minutes: 15
+
 spring:
   application:
     name: marketplace

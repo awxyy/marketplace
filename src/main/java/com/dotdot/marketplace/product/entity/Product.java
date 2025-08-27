@@ -27,6 +27,12 @@ public class Product {
 
     private double price;
 
+    @Column(name = "quantity")
+    private int quantity;
+
+    @Column(name = "reserved_quantity")
+    private int reservedQuantity = 0;
+
     @ManyToOne
     @JoinColumn(name ="seller")
     private User seller;
@@ -39,4 +45,9 @@ public class Product {
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
+
+    public int getAvailableQuantity() {
+        return quantity - reservedQuantity;
+    }
+
 }

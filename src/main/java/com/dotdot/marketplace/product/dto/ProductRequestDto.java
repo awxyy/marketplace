@@ -24,5 +24,5 @@ public class ProductRequestDto {
 
     @NotNull(message = "sellerId required")
     private Long sellerId;
-
+    private int quantity;
 }
