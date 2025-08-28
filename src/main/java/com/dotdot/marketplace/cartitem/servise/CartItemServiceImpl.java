@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -29,7 +31,7 @@ public class CartItemServiceImpl implements CartItemService {
     private final CartItemRepository cartItemRepository;
     private final ModelMapper modelMapper;
     private final UserRepository userRepository;
-    private  final ProductRepository productRepository;
+    private final ProductRepository productRepository;
 
     @Override
     @CacheEvict(value = "userCartItems", key = "#dto.userId")
@@ -78,14 +80,20 @@ public class CartItemServiceImpl implements CartItemService {
 
 
     @Override
-    @CacheEvict(value = "userCartItems", key = "#userId")
-    public void deleteCartItemById(Long id, Long userId) {
+    @CacheEvict(value = "userCartItems", key = "#id")
+    public void deleteCartItemById(Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userId = (Long) authentication.getPrincipal();
+
         CartItem cartItem = cartItemRepository.findById(id)
                 .orElseThrow(() -> new CartItemNotFoundException("CartItem not found"));
+
         if (cartItem.getUser().getId() != userId) {
             throw new IllegalArgumentException("CartItem does not belong to this user");
         }
-        cartItemRepository.deleteById(id);
+
+        cartItemRepository.delete(cartItem);
+
     }
 
 }

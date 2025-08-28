@@ -31,6 +31,10 @@ public class UserPrincipal implements UserDetails {
     }
 
 
+    public Long getId() {
+        return user.getId();
+    }
+
     @Override
     public boolean isAccountNonExpired() {
         return true;

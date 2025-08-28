@@ -1,6 +1,5 @@
 package com.dotdot.marketplace.configuration.jwt;
 
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;

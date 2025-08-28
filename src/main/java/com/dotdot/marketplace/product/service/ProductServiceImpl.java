@@ -8,6 +8,7 @@ import com.dotdot.marketplace.product.entity.Product;
 import com.dotdot.marketplace.product.entity.ProductStatus;
 import com.dotdot.marketplace.product.repository.ProductRepository;
 import com.dotdot.marketplace.product.spec.ProductSpecification;
+import com.dotdot.marketplace.review.service.ReviewService;
 import com.dotdot.marketplace.user.entity.User;
 import com.dotdot.marketplace.user.entity.UserRole;
 import com.dotdot.marketplace.user.repository.UserRepository;
@@ -16,6 +17,9 @@ import com.dotdot.marketplace.user.security.UserPrincipal;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +44,7 @@ public class ProductServiceImpl implements ProductService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final UserDetailsServiceImpl userDetailsService;
+    private final ReviewService reviewService;
 
     @Override
     @CacheEvict(value = "productList", allEntries = true)
@@ -69,7 +74,10 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Product with ID " + id + " not found"));
 
-        return modelMapper.map(product, ProductResponseDto.class);
+        ProductResponseDto productResponseDto = modelMapper.map(product, ProductResponseDto.class);
+        productResponseDto.setAverageRating(reviewService.getAverageRating(id));
+        productResponseDto.setReviewCount(reviewService.getReviewCount(id));
+        return productResponseDto;
     }
 
     @Override
