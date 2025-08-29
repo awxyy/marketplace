@@ -24,5 +24,7 @@ public class ProductRequestDto {
 
     @NotNull(message = "sellerId required")
     private Long sellerId;
+
+    @Min(value = 0, message = "Quantity cannot be negative")
     private int quantity;
 }

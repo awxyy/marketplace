@@ -1,4 +1,4 @@
-package com.dotdot.marketplace.reservation.sheduler;
+package com.dotdot.marketplace.reservation.scheduler;
 
 import com.dotdot.marketplace.reservation.service.ReservationService;
 import lombok.RequiredArgsConstructor;

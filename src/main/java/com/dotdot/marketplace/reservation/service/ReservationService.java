@@ -132,21 +132,11 @@ public class ReservationService {
     public int cleanupExpiredReservations() {
         LocalDateTime now = LocalDateTime.now();
 
-        List<Reservation> expiredReservations = reservationRepository
-                .findByExpiresAtBeforeAndStatus(now, ReservationStatus.ACTIVE);
-
-        int cleanedCount = 0;
-        for (Reservation reservation : expiredReservations) {
-            Product product = reservation.getProduct();
-
-            product.setReservedQuantity(product.getReservedQuantity() - reservation.getQuantity());
-            productRepository.save(product);
-
-            reservation.setStatus(ReservationStatus.EXPIRED);
-            reservationRepository.save(reservation);
-
-            cleanedCount++;
-        }
+        int cleanedCount = reservationRepository.updateExpiredReservations(
+                now,
+                ReservationStatus.ACTIVE,
+                ReservationStatus.EXPIRED
+        );
 
         log.info("Cleaned up {} expired reservations", cleanedCount);
         return cleanedCount;

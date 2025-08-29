@@ -2,6 +2,8 @@ package com.dotdot.marketplace.order.service;
 
 
 import com.dotdot.marketplace.exception.OrderNotFoundException;
+import com.dotdot.marketplace.exception.ProductUnavailableException;
+import com.dotdot.marketplace.exception.ReservationConversionException;
 import com.dotdot.marketplace.order.dto.OrderRequestDto;
 import com.dotdot.marketplace.order.dto.OrderResponseDto;
 import com.dotdot.marketplace.order.entity.Order;
@@ -51,10 +53,8 @@ public class OrderServiceImpl implements OrderService {
             Product product = productRepository.findById(itemDto.getProductId())
                     .orElseThrow(() -> new RuntimeException("Product not found"));
 
-            if (product.getStatus() != ProductStatus.AVAILABLE) {
-                throw new RuntimeException("Product is not available for purchase: " + product.getName());
-            }
-            
+            validateProductStatus(product);
+
             if (itemDto.getQuantity() <= 0) {
                 throw new IllegalArgumentException("Quantity must be greater than 0");
             }
@@ -65,7 +65,7 @@ public class OrderServiceImpl implements OrderService {
 
             try {
                 reservationService.convertReservationToOrder(dto.getUser(), itemDto.getProductId());
-            } catch (Exception e) {
+            } catch (ReservationConversionException e) {
                 product.setQuantity(product.getQuantity() - itemDto.getQuantity());
                 productRepository.save(product);
             }
@@ -162,6 +162,14 @@ public class OrderServiceImpl implements OrderService {
         }
         if (!valid) {
             throw new IllegalArgumentException("Invalid status value: " + status);
+        }
+    }
+
+    private void validateProductStatus(Product product) {
+        if (product.getStatus() != ProductStatus.AVAILABLE) {
+            throw new ProductUnavailableException(
+                    "Product is not available for purchase: " + product.getName()
+            );
         }
     }
 
