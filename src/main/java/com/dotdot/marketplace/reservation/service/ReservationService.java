@@ -1,5 +1,6 @@
 package com.dotdot.marketplace.reservation.service;
 
+import com.dotdot.marketplace.exception.ReservationNotFoundException;
 import com.dotdot.marketplace.product.entity.Product;
 import com.dotdot.marketplace.product.repository.ProductRepository;
 import com.dotdot.marketplace.reservation.entity.Reservation;
@@ -112,31 +113,44 @@ public class ReservationService {
 
     @Transactional
     public void convertReservationToOrder(Long userId, Long productId) {
-        var reservation = reservationRepository
-                .findByUserIdAndProductIdAndStatus(userId, productId, ReservationStatus.ACTIVE);
+        Reservation reservation = reservationRepository
+                .findByUserIdAndProductIdAndStatus(userId, productId, ReservationStatus.ACTIVE)
+                .orElseThrow(() -> new ReservationNotFoundException(
+                        "No active reservation found for userId=" + userId + ", productId=" + productId
+                ));
 
-        if (reservation.isPresent()) {
-            Reservation res = reservation.get();
-            Product product = res.getProduct();
+        Product product = reservation.getProduct();
 
-            product.setQuantity(product.getQuantity() - res.getQuantity());
-            product.setReservedQuantity(product.getReservedQuantity() - res.getQuantity());
-            productRepository.save(product);
-
-            res.setStatus(ReservationStatus.CONVERTED_TO_ORDER);
-            reservationRepository.save(res);
+        if (product.getQuantity() < reservation.getQuantity()) {
+            throw new RuntimeException("Not enough stock to convert reservation for product: "
+                    + product.getName());
         }
+
+        product.setQuantity(product.getQuantity() - reservation.getQuantity());
+        product.setReservedQuantity(product.getReservedQuantity() - reservation.getQuantity());
+        productRepository.save(product);
+
+        reservation.setStatus(ReservationStatus.CONVERTED_TO_ORDER);
+        reservationRepository.save(reservation);
     }
 
     @Transactional
     public int cleanupExpiredReservations() {
         LocalDateTime now = LocalDateTime.now();
 
-        int cleanedCount = reservationRepository.updateExpiredReservations(
-                now,
-                ReservationStatus.ACTIVE,
-                ReservationStatus.EXPIRED
+        List<Reservation> expiredReservations = reservationRepository.findByExpiresAtBeforeAndStatus(
+                ReservationStatus.ACTIVE, now
         );
+
+        for (Reservation reservation : expiredReservations) {
+            Product product = reservation.getProduct();
+            product.setReservedQuantity(product.getReservedQuantity() - reservation.getQuantity());
+            productRepository.save(product);
+
+            reservation.setStatus(ReservationStatus.EXPIRED);
+            reservationRepository.save(reservation);
+        }
+        int cleanedCount = expiredReservations.size();
 
         log.info("Cleaned up {} expired reservations", cleanedCount);
         return cleanedCount;

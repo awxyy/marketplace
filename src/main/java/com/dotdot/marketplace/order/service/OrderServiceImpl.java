@@ -66,6 +66,9 @@ public class OrderServiceImpl implements OrderService {
             try {
                 reservationService.convertReservationToOrder(dto.getUser(), itemDto.getProductId());
             } catch (ReservationConversionException e) {
+                if (product.getQuantity() < itemDto.getQuantity()) {
+                    throw new RuntimeException("Not enough stock for product: " + product.getName());
+                }
                 product.setQuantity(product.getQuantity() - itemDto.getQuantity());
                 productRepository.save(product);
             }
