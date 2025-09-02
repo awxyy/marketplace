@@ -1,5 +1,6 @@
 package com.dotdot.marketplace.user.service;
 
+import com.dotdot.marketplace.exception.RoleNotFoundException;
 import com.dotdot.marketplace.user.entity.Role;
 import com.dotdot.marketplace.user.entity.User;
 import com.dotdot.marketplace.user.entity.UserRole;
@@ -29,7 +30,7 @@ public class UserRoleServiceImpl implements UserRoleService {
 
         userRoles.forEach(userRole -> {
             Role role = roleRepository.findByName(userRole)
-                    .orElseThrow(() -> new RuntimeException("Role not found: " + userRole));
+                    .orElseThrow(() -> new RoleNotFoundException("Role not found: " + userRole));
             this.addRoleToUser(user, role);
         });
 
@@ -73,10 +74,10 @@ public class UserRoleServiceImpl implements UserRoleService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         
-        return this.getUserRoles(user);
+        return this.extractUserRoles(user);
     }
 
-    private Set<UserRole> getUserRoles(User user) {
+    private Set<UserRole> extractUserRoles(User user) {
         return user.getRoles().stream()
                 .map(Role::getName)
                 .collect(java.util.stream.Collectors.toSet());

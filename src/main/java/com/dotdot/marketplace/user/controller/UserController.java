@@ -4,9 +4,8 @@ import com.dotdot.marketplace.user.dto.UserRequestDto;
 import com.dotdot.marketplace.user.dto.UserResponseDto;
 import com.dotdot.marketplace.user.entity.User;
 import com.dotdot.marketplace.user.entity.UserRole;
-import com.dotdot.marketplace.user.repository.UserRepository;
 import com.dotdot.marketplace.user.service.UserRoleService;
-import com.dotdot.marketplace.user.service.UserServiceImpl;
+import com.dotdot.marketplace.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,14 +14,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Set;
 
-
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private final UserServiceImpl userService;
+
+    private final UserService userService;
     private final UserRoleService userRoleService;
-    private final UserRepository userRepository;
 
     @PostMapping()
     public ResponseEntity<UserResponseDto> createUser(@Valid @RequestBody UserRequestDto userRequest) {
@@ -47,20 +45,17 @@ public class UserController {
 
     @GetMapping("/all")
     public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
     @GetMapping("/{userId}/roles")
     public ResponseEntity<Set<UserRole>> getUserRoles(@PathVariable Long userId) {
-        Set<UserRole> roles = userRoleService.getUserRoles(userId);
-        return ResponseEntity.ok(roles);
+        return ResponseEntity.ok(userRoleService.getUserRoles(userId)); // ← Інлайнено
     }
 
     @GetMapping("/{userId}/roles/{role}")
     public ResponseEntity<Boolean> hasRole(@PathVariable Long userId, @PathVariable UserRole role) {
-        boolean hasRole = userRoleService.userHasRole(userId, role);
-        return ResponseEntity.ok(hasRole);
+        return ResponseEntity.ok(userRoleService.userHasRole(userId, role)); // ← Інлайнено
     }
 
     @PostMapping("/{userId}/roles/{role}")
@@ -74,5 +69,4 @@ public class UserController {
         userRoleService.removeRoleFromUser(userId, role);
         return ResponseEntity.ok("Role " + role + " removed from user " + userId);
     }
-
 }

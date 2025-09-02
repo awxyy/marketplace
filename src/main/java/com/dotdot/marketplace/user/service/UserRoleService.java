@@ -16,4 +16,5 @@ public interface UserRoleService {
     boolean userHasRole(Long userId, UserRole userRole);
 
     Set<UserRole> getUserRoles(Long userId);
+
 }

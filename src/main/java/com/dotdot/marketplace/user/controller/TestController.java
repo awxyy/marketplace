@@ -15,7 +15,6 @@ public class TestController {
 
     private final UserRoleService userRoleService;
 
-    // Створити тестового користувача з роллю USER
     @PostMapping("/create-user")
     public ResponseEntity<String> createTestUser() {
         userRoleService.createUserWithRoles(
@@ -27,7 +26,6 @@ public class TestController {
         return ResponseEntity.ok("Test user created with USER role");
     }
 
-    // Створити тестового продавця з ролями USER + SELLER
     @PostMapping("/create-seller")
     public ResponseEntity<String> createTestSeller() {
         userRoleService.createUserWithRoles(

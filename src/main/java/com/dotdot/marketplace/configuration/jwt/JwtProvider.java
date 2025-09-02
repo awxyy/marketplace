@@ -40,7 +40,7 @@ public class JwtProvider {
         long now = System.currentTimeMillis();
 
         Map<String, Object> claims = new HashMap<>(extraClaims);
-        claims.put("sub", userDetails.getUsername());
+        claims.put("userId", userDetails.getUsername());
         claims.put("roles", userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList());
@@ -74,6 +74,10 @@ public class JwtProvider {
     private SecretKey getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(jwtProperties.getSecret());
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public Long extractUserId(String token) {
+        return extractClaims(token, claims -> claims.get("userId", Long.class));
     }
 
 }

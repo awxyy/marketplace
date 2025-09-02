@@ -4,6 +4,8 @@ import com.dotdot.marketplace.user.dto.UserRequestDto;
 import com.dotdot.marketplace.user.dto.UserResponseDto;
 import com.dotdot.marketplace.user.entity.User;
 
+import java.util.List;
+
 public interface UserService {
     UserResponseDto createUser(UserRequestDto userRequest);
 
@@ -14,4 +16,7 @@ public interface UserService {
     void deleteUser(Long id);
 
     User findByLogin(String login);
+
+    List<User> getAllUsers();
+
 }

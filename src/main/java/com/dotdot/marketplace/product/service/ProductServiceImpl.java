@@ -96,15 +96,14 @@ public class ProductServiceImpl implements ProductService {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
         User currentUser = userPrincipal.getUser();
 
-        if (!currentUser.getRoles().contains(UserRole.SELLER)) {
+        if (!userDetailsService.hasRole(UserRole.SELLER)) {
             throw new UnauthorizedException("Only users with SELLER status can update products");
         }
 
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Product with ID " + id + " not found"));
 
-
-        if (product.getSeller().getId() !=     currentUser.getId()) {
+        if (product.getSeller().getId() !=  currentUser.getId()){
             throw new UnauthorizedException("You can only update your own products");
         }
 
@@ -126,7 +125,7 @@ public class ProductServiceImpl implements ProductService {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
         User currentUser = userPrincipal.getUser();
 
-        if (!currentUser.getRoles().contains(UserRole.SELLER)) {
+        if (!userDetailsService.hasRole(UserRole.SELLER)) {
             throw new UnauthorizedException("Only users with SELLER status can delete products");
         }
 
