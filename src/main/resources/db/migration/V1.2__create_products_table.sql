@@ -14,6 +14,14 @@ ALTER TABLE products
             REFERENCES users(id);
 
 ALTER TABLE products
+    ADD COLUMN average_rating NUMERIC(3,2) DEFAULT 0.0,
+    ADD COLUMN review_count BIGINT DEFAULT 0;
+
+CREATE INDEX idx_products_average_rating ON products (average_rating DESC);
+
+CREATE INDEX idx_products_review_count ON products (review_count DESC);
+
+ALTER TABLE products
     ADD COLUMN quantity INT NOT NULL DEFAULT 0,
     ADD COLUMN reserved_quantity INT NOT NULL DEFAULT 0;
 

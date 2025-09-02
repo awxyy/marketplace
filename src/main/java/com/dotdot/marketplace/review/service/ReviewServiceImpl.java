@@ -47,6 +47,8 @@ public class ReviewServiceImpl implements ReviewService {
 
         Review savedReview = reviewRepository.save(review);
 
+        updateProductRating(product);
+
         return modelMapper.map(savedReview, ReviewResponseDto.class);
     }
 
@@ -77,14 +79,21 @@ public class ReviewServiceImpl implements ReviewService {
                 .orElseThrow(() -> new IllegalArgumentException("Review not found"));
         review.setComment(reviewRequestDto.getComment());
         review.setRating(reviewRequestDto.getRating());
-        return modelMapper.map(reviewRepository.save(review), ReviewResponseDto.class);
+
+        Review updatedReview = reviewRepository.save(review);
+
+        updateProductRating(updatedReview.getProduct());
+
+        return modelMapper.map(updatedReview, ReviewResponseDto.class);
     }
 
     @Override
     public void deleteReview(long reviewId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new IllegalArgumentException("Review not found"));
+        Product product = review.getProduct();
         reviewRepository.delete(review);
+        updateProductRating(product);
 
     }
 
@@ -99,4 +108,18 @@ public class ReviewServiceImpl implements ReviewService {
     public long getReviewCount(long productId) {
         return reviewRepository.countByProductId(productId);
     }
+
+    private void updateProductRating(Product product) {
+        List<Review> reviews = reviewRepository.findByProductId(product.getId());
+        double avgRating = reviewRepository.findByProductId(product.getId())
+                .stream()
+                .mapToInt(Review::getRating)
+                .average()
+                .orElse(0.0);
+
+        product.setAverageRating(avgRating);
+        product.setReviewCount((long) reviews.size());
+        productRepository.save(product);
+    }
+
 }
