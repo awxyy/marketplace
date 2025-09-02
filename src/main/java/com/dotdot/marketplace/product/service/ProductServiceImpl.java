@@ -117,7 +117,14 @@ public class ProductServiceImpl implements ProductService {
         );
 
         Page<Product> products = productRepository.findAll(spec, pageable);
-        return products.map(product -> modelMapper.map(product, ProductResponseDto.class));
+        return products.map(product -> {
+            ProductResponseDto dto = modelMapper.map(product, ProductResponseDto.class);
+            dto.setAverageRating(product.getAverageRating());
+            dto.setReviewCount(product.getReviewCount());
+            return dto;
+        });
     }
+
+
 
 }

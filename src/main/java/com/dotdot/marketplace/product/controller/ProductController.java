@@ -52,7 +52,9 @@ public class ProductController {
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "DESC") String direction
     ) {
         ProductFilterRequest filterRequest = new ProductFilterRequest();
         filterRequest.setName(name);
@@ -60,6 +62,9 @@ public class ProductController {
         filterRequest.setMaxPrice(maxPrice);
         filterRequest.setPage(page);
         filterRequest.setSize(size);
+        filterRequest.setSortBy(sortBy);
+        filterRequest.setDirection(direction);
         return ResponseEntity.ok(productService.filterProducts(filterRequest));
     }
+
 }
