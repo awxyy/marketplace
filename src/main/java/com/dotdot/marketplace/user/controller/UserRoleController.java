@@ -2,6 +2,7 @@ package com.dotdot.marketplace.user.controller;
 
 import com.dotdot.marketplace.user.entity.UserRole;
 import com.dotdot.marketplace.user.service.UserRoleService;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -50,22 +51,11 @@ public class UserRoleController {
         return ResponseEntity.ok("User created with roles: " + request.getRoles());
     }
 
+    @Data
     public static class CreateUserRequest {
         private String login;
         private String password;
         private String fullName;
         private Set<UserRole> roles;
-
-        public String getLogin() { return login; }
-        public void setLogin(String login) { this.login = login; }
-
-        public String getPassword() { return password; }
-        public void setPassword(String password) { this.password = password; }
-
-        public String getFullName() { return fullName; }
-        public void setFullName(String fullName) { this.fullName = fullName; }
-
-        public Set<UserRole> getRoles() { return roles; }
-        public void setRoles(Set<UserRole> roles) { this.roles = roles; }
     }
 }
