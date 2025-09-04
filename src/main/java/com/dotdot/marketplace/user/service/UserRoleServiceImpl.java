@@ -1,6 +1,7 @@
 package com.dotdot.marketplace.user.service;
 
 import com.dotdot.marketplace.exception.RoleNotFoundException;
+import com.dotdot.marketplace.exception.UserNotFoundException;
 import com.dotdot.marketplace.user.entity.Role;
 import com.dotdot.marketplace.user.entity.User;
 import com.dotdot.marketplace.user.entity.UserRole;
@@ -40,10 +41,10 @@ public class UserRoleServiceImpl implements UserRoleService {
     @Override
     public void addRoleToUser(Long userId, UserRole userRole) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
         
         Role role = roleRepository.findByName(userRole)
-                .orElseThrow(() -> new RuntimeException("Role not found: " + userRole));
+                .orElseThrow(() -> new RoleNotFoundException("Role not found: " + userRole));
         
         this.addRoleToUser(user, role);
         userRepository.save(user);
@@ -52,10 +53,10 @@ public class UserRoleServiceImpl implements UserRoleService {
     @Override
     public void removeRoleFromUser(Long userId, UserRole userRole) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
         
         Role role = roleRepository.findByName(userRole)
-                .orElseThrow(() -> new RuntimeException("Role not found: " + userRole));
+                .orElseThrow(() -> new RoleNotFoundException("Role not found: " + userRole));
         
         this.removeRoleFromUser(user, role);
         userRepository.save(user);
@@ -64,7 +65,7 @@ public class UserRoleServiceImpl implements UserRoleService {
     @Override
     public boolean userHasRole(Long userId, UserRole userRole) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
         
         return this.hasRole(user, userRole);
     }
@@ -72,7 +73,7 @@ public class UserRoleServiceImpl implements UserRoleService {
     @Override
     public Set<UserRole> getUserRoles(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
         
         return this.extractUserRoles(user);
     }

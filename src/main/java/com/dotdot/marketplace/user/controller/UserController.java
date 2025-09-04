@@ -50,23 +50,23 @@ public class UserController {
 
     @GetMapping("/{userId}/roles")
     public ResponseEntity<Set<UserRole>> getUserRoles(@PathVariable Long userId) {
-        return ResponseEntity.ok(userRoleService.getUserRoles(userId)); // ← Інлайнено
+        return ResponseEntity.ok(userRoleService.getUserRoles(userId));
     }
 
     @GetMapping("/{userId}/roles/{role}")
     public ResponseEntity<Boolean> hasRole(@PathVariable Long userId, @PathVariable UserRole role) {
-        return ResponseEntity.ok(userRoleService.userHasRole(userId, role)); // ← Інлайнено
+        return ResponseEntity.ok(userRoleService.userHasRole(userId, role));
     }
 
     @PostMapping("/{userId}/roles/{role}")
-    public ResponseEntity<String> addRole(@PathVariable Long userId, @PathVariable UserRole role) {
+    public ResponseEntity<Void> addRole(@PathVariable Long userId, @PathVariable UserRole role) {
         userRoleService.addRoleToUser(userId, role);
-        return ResponseEntity.ok("Role " + role + " added to user " + userId);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{userId}/roles/{role}")
-    public ResponseEntity<String> removeRole(@PathVariable Long userId, @PathVariable UserRole role) {
+    public ResponseEntity<Void> removeRole(@PathVariable Long userId, @PathVariable UserRole role) {
         userRoleService.removeRoleFromUser(userId, role);
-        return ResponseEntity.ok("Role " + role + " removed from user " + userId);
+        return ResponseEntity.noContent().build();
     }
 }
