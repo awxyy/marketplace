@@ -25,16 +25,33 @@ public class ProductController {
         return ResponseEntity.ok(productService.create(request));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ProductResponseDto> getById(@PathVariable long id) {
-        return ResponseEntity.ok(productService.getById(id));
-    }
-
     @GetMapping
     public ResponseEntity<List<ProductResponseDto>> getAll() {
         return ResponseEntity.ok(productService.getAll());
     }
 
+    @GetMapping("/filter")
+    public ResponseEntity<Page<ProductResponseDto>> filter(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction
+    ) {
+        return ResponseEntity.ok(
+            productService.filterProducts(
+                ProductFilterRequest.of(name, minPrice, maxPrice, page, size, sortBy, direction)
+            )
+        );
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductResponseDto> getById(@PathVariable long id) {
+        return ResponseEntity.ok(productService.getById(id));
+    }
+    
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponseDto> update(@PathVariable long id, @Valid @RequestBody ProductRequestDto request) {
         return ResponseEntity.ok(productService.update(id, request));
@@ -44,22 +61,5 @@ public class ProductController {
     public ResponseEntity<Void> delete(@PathVariable long id) {
         productService.delete(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/filter")
-    public ResponseEntity<Page<ProductResponseDto>> filter(
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) BigDecimal minPrice,
-            @RequestParam(required = false) BigDecimal maxPrice,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        ProductFilterRequest filterRequest = new ProductFilterRequest();
-        filterRequest.setName(name);
-        filterRequest.setMinPrice(minPrice);
-        filterRequest.setMaxPrice(maxPrice);
-        filterRequest.setPage(page);
-        filterRequest.setSize(size);
-        return ResponseEntity.ok(productService.filterProducts(filterRequest));
     }
 }
