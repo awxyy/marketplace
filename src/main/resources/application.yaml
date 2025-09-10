@@ -23,6 +23,8 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+    repair: true
+    out-of-order: true
 
   data:
     redis:
