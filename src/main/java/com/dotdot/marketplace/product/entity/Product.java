@@ -50,7 +50,7 @@ public class Product {
     private Double averageRating = 0.0;
 
     @Column(name = "review_count")
-    private Long reviewCount = 0L;
+    private Long reviewsCount = 0L;
 
 
     public int getAvailableQuantity() {

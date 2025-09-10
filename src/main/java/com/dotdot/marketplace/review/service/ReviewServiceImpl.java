@@ -111,14 +111,14 @@ public class ReviewServiceImpl implements ReviewService {
 
     private void updateProductRating(Product product) {
         List<Review> reviews = reviewRepository.findByProductId(product.getId());
-        double avgRating = reviewRepository.findByProductId(product.getId())
-                .stream()
+
+        double avgRating = reviews.stream()
                 .mapToInt(Review::getRating)
                 .average()
                 .orElse(0.0);
 
         product.setAverageRating(avgRating);
-        product.setReviewCount((long) reviews.size());
+        product.setReviewsCount((long) reviews.size());
         productRepository.save(product);
     }
 
