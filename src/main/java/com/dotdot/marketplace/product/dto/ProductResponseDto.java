@@ -22,4 +22,5 @@ public class ProductResponseDto {
     private LocalDateTime createdAt;
     private double averageRating;
     private long reviewCount;
+    private int quantity;
 }

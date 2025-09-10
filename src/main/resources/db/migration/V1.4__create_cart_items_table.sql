@@ -15,3 +15,5 @@ ALTER TABLE cart_items
     ADD CONSTRAINT fk_cart_items_product
         FOREIGN KEY (product_id)
             REFERENCES products(id);
+ALTER TABLE cart_items
+    ADD COLUMN reserved_until TIMESTAMP NOT NULL DEFAULT (NOW() + INTERVAL '30 minutes');

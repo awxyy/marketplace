@@ -2,6 +2,8 @@ package com.dotdot.marketplace.order.service;
 
 
 import com.dotdot.marketplace.exception.OrderNotFoundException;
+import com.dotdot.marketplace.exception.ProductUnavailableException;
+import com.dotdot.marketplace.exception.ReservationConversionException;
 import com.dotdot.marketplace.order.dto.OrderRequestDto;
 import com.dotdot.marketplace.order.dto.OrderResponseDto;
 import com.dotdot.marketplace.order.entity.Order;
@@ -10,13 +12,16 @@ import com.dotdot.marketplace.order.repository.OrderRepository;
 import com.dotdot.marketplace.orderitem.dto.OrderItemRequestDto;
 import com.dotdot.marketplace.orderitem.entity.OrderItem;
 import com.dotdot.marketplace.product.entity.Product;
+import com.dotdot.marketplace.product.entity.ProductStatus;
 import com.dotdot.marketplace.product.repository.ProductRepository;
+import com.dotdot.marketplace.reservation.service.ReservationService;
 import com.dotdot.marketplace.user.entity.User;
 import com.dotdot.marketplace.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -30,8 +35,10 @@ public class OrderServiceImpl implements OrderService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final ModelMapper modelMapper;
+    private final ReservationService reservationService;
 
     @Override
+    @Transactional
     public OrderResponseDto createOrder(OrderRequestDto dto) {
         User user = userRepository.findById(dto.getUser())
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -45,6 +52,26 @@ public class OrderServiceImpl implements OrderService {
         for (OrderItemRequestDto itemDto : dto.getOrderItems()) {
             Product product = productRepository.findById(itemDto.getProductId())
                     .orElseThrow(() -> new RuntimeException("Product not found"));
+
+            validateProductStatus(product);
+
+            if (itemDto.getQuantity() <= 0) {
+                throw new IllegalArgumentException("Quantity must be greater than 0");
+            }
+
+            if (product.getAvailableQuantity() < itemDto.getQuantity()) {
+                throw new RuntimeException("Not enough stock for product: " + product.getName());
+            }
+
+            try {
+                reservationService.convertReservationToOrder(dto.getUser(), itemDto.getProductId());
+            } catch (ReservationConversionException e) {
+                if (product.getQuantity() < itemDto.getQuantity()) {
+                    throw new RuntimeException("Not enough stock for product: " + product.getName());
+                }
+                product.setQuantity(product.getQuantity() - itemDto.getQuantity());
+                productRepository.save(product);
+            }
 
             OrderItem orderItem = new OrderItem();
             orderItem.setQuantity(itemDto.getQuantity());
@@ -138,6 +165,14 @@ public class OrderServiceImpl implements OrderService {
         }
         if (!valid) {
             throw new IllegalArgumentException("Invalid status value: " + status);
+        }
+    }
+
+    private void validateProductStatus(Product product) {
+        if (product.getStatus() != ProductStatus.AVAILABLE) {
+            throw new ProductUnavailableException(
+                    "Product is not available for purchase: " + product.getName()
+            );
         }
     }
 

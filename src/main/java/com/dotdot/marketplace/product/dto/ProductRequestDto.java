@@ -21,4 +21,9 @@ public class ProductRequestDto {
     @Min(value = 1, message = "Price must be greater than 0")
     private double price;
 
+    @NotNull(message = "sellerId required")
+    private Long sellerId;
+
+    @Min(value = 0, message = "Quantity cannot be negative")
+    private int quantity;
 }

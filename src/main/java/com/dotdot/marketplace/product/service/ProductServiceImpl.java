@@ -60,7 +60,8 @@ public class ProductServiceImpl implements ProductService {
         product.setSeller(currentUser);
         product.setCreatedAt(LocalDateTime.now());
         product.setStatus(ProductStatus.AVAILABLE);
-
+        product.setQuantity(request.getQuantity());
+        product.setReservedQuantity(0);
         Product savedProduct = productRepository.save(product);
         return modelMapper.map(savedProduct, ProductResponseDto.class);
     }

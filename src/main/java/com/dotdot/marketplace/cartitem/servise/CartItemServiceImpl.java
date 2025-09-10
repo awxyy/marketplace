@@ -9,6 +9,7 @@ import com.dotdot.marketplace.exception.ProductNotFoundException;
 import com.dotdot.marketplace.exception.UserNotFoundException;
 import com.dotdot.marketplace.product.entity.Product;
 import com.dotdot.marketplace.product.repository.ProductRepository;
+import com.dotdot.marketplace.reservation.service.ReservationService;
 import com.dotdot.marketplace.user.entity.User;
 import com.dotdot.marketplace.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +19,11 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -32,23 +35,40 @@ public class CartItemServiceImpl implements CartItemService {
     private final ModelMapper modelMapper;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+    private final ReservationService reservationService;
 
     @Override
+    @Transactional
     @CacheEvict(value = "userCartItems", key = "#dto.userId")
     public CartItemResponseDto addProductToCart(CartItemRequestDto dto) {
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
         Product product = productRepository.findById(dto.getProductId())
-                .orElseThrow(() -> new ProductNotFoundException("User not found"));
+                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
 
-        CartItem cartItem = new CartItem();
-        cartItem.setUser(user);
-        cartItem.setProduct(product);
-        cartItem.setQuantity(dto.getQuantity());
-        cartItem.setAddedAt(LocalDateTime.now());
+        try {
+            reservationService.createOrUpdateReservation(dto.getUserId(), dto.getProductId(), dto.getQuantity());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Cannot add to cart: " + e.getMessage());
+        }
 
-        CartItem saved = cartItemRepository.save(cartItem);
-        return modelMapper.map(saved, CartItemResponseDto.class);
+        Optional<CartItem> existingCartItem = cartItemRepository.findByUserIdAndProductId(dto.getUserId(), dto.getProductId());
+        if (existingCartItem.isPresent()) {
+            CartItem cartItem = existingCartItem.get();
+            cartItem.setQuantity(dto.getQuantity());
+            cartItem.setAddedAt(LocalDateTime.now());
+            CartItem saved = cartItemRepository.save(cartItem);
+            return modelMapper.map(saved, CartItemResponseDto.class);
+        } else {
+            CartItem cartItem = new CartItem();
+            cartItem.setUser(user);
+            cartItem.setProduct(product);
+            cartItem.setQuantity(dto.getQuantity());
+            cartItem.setAddedAt(LocalDateTime.now());
+
+            CartItem saved = cartItemRepository.save(cartItem);
+            return modelMapper.map(saved, CartItemResponseDto.class);
+        }
     }
 
     @Override
@@ -69,10 +89,16 @@ public class CartItemServiceImpl implements CartItemService {
     }
 
     @Override
+    @Transactional
     @CacheEvict(value = "userCartItems", key = "#dto.userId")
     public CartItemResponseDto updateQuantityByCartItemId(CartItemRequestDto dto, long id) {
         CartItem cartItem = cartItemRepository.findById(id)
                 .orElseThrow(() -> new CartItemNotFoundException("CartItem not found"));
+        try {
+            reservationService.createOrUpdateReservation(dto.getUserId(), cartItem.getProduct().getId(), dto.getQuantity());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Cannot update cart item: " + e.getMessage());
+        }
         cartItem.setQuantity(dto.getQuantity());
         CartItem saved = cartItemRepository.save(cartItem);
         return modelMapper.map(saved, CartItemResponseDto.class);
@@ -80,6 +106,7 @@ public class CartItemServiceImpl implements CartItemService {
 
 
     @Override
+    @Transactional
     @CacheEvict(value = "userCartItems", key = "#id")
     public void deleteCartItemById(Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -91,6 +118,8 @@ public class CartItemServiceImpl implements CartItemService {
         if (cartItem.getUser().getId() != userId) {
             throw new IllegalArgumentException("CartItem does not belong to this user");
         }
+
+        reservationService.releaseReservation(userId, cartItem.getProduct().getId());
 
         cartItemRepository.delete(cartItem);
 

@@ -12,3 +12,16 @@ ALTER TABLE products
     ADD CONSTRAINT fk_product_seller
         FOREIGN KEY (seller)
             REFERENCES users(id);
+
+ALTER TABLE products
+    ADD COLUMN quantity INT NOT NULL DEFAULT 0,
+    ADD COLUMN reserved_quantity INT NOT NULL DEFAULT 0;
+
+ALTER TABLE products
+    ADD CONSTRAINT chk_reserved_quantity_non_negative
+        CHECK (reserved_quantity >= 0);
+
+
+ALTER TABLE products
+    ADD CONSTRAINT chk_available_quantity_non_negative
+        CHECK (quantity - reserved_quantity >= 0);
