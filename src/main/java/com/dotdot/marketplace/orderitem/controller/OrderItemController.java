@@ -3,7 +3,6 @@ package com.dotdot.marketplace.orderitem.controller;
 import com.dotdot.marketplace.orderitem.dto.OrderItemRequestDto;
 import com.dotdot.marketplace.orderitem.dto.OrderItemResponseDto;
 import com.dotdot.marketplace.orderitem.service.OrderItemService;
-import com.dotdot.marketplace.orderitem.service.OrderItemServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -38,7 +37,7 @@ public class OrderItemController {
     public ResponseEntity<OrderItemResponseDto> update(@PathVariable Long id, @RequestBody Map<String, Integer> body) {
         log.info("Updating order item with id: {}", id);
         int quantity = body.get("quantity");
-        OrderItemResponseDto respons =  orderItemService.updateQuantity(id, quantity);
+        OrderItemResponseDto respons = orderItemService.updateQuantity(id, quantity);
         log.info("Updated order item with id: {}", respons.getId());
         return ResponseEntity.ok(respons);
     }
