@@ -82,7 +82,7 @@ public class UserController {
 
     @PostMapping("/{userId}/roles/{role}")
     public ResponseEntity<Void> addRole(@PathVariable Long userId, @PathVariable UserRole role) {
-        log.info("adding role: {} to user with id: {}", role, userId);
+        log.info("Adding role: {} to user with id: {}", role, userId);
         userRoleService.addRoleToUser(userId, role);
         log.info("Role added successfully");
         return ResponseEntity.ok().build();

@@ -70,7 +70,6 @@ public class ReviewServiceImpl implements ReviewService {
             throw new IllegalArgumentException("Product not found");
         }
         List<Review> reviews = reviewRepository.findByProductId(productId);
-        log.info("Get reviews by product ID: {}", productId);
         return reviews.stream()
                 .map(review -> modelMapper.map(review, ReviewResponseDto.class))
                 .collect(Collectors.toList());
@@ -81,7 +80,7 @@ public class ReviewServiceImpl implements ReviewService {
         log.info("Get review by ID: {}", reviewId);
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> {
-                    log.warn("Review not found:{}", reviewId);
+                    log.warn("Review not found: {}", reviewId);
                     return new IllegalArgumentException("Review not found");
                 });
         log.info("Review found successfully: ID {}", review.getId());
@@ -123,7 +122,6 @@ public class ReviewServiceImpl implements ReviewService {
     public double getAverageRating(long productId) {
         log.info("Get average rating: {}", productId);
         List<Review> reviews = reviewRepository.findByProductId(productId);
-        log.info("Get average rating successfully: {}", productId);
         return reviews.stream()
                 .mapToInt(Review::getRating)
                 .average()

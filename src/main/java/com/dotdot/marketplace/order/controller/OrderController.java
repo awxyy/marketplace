@@ -20,9 +20,9 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<OrderResponseDto> createOrder(@RequestBody OrderRequestDto orderRequestDto) {
-        log.info("Creating order: {}", orderRequestDto);
+        log.info("Creating order");
         OrderResponseDto orderResponseDto = orderService.createOrder(orderRequestDto);
-        log.info("Order created: {}", orderResponseDto);
+        log.info("Order created: {}", orderResponseDto.getId());
         return ResponseEntity.ok(orderResponseDto);
     }
 

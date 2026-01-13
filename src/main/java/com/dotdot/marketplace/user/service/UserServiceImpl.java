@@ -28,7 +28,6 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("User with this login already exists");
         }
         validatePassword(userRequest.getPassword());
-        log.info("Password validation passed for login: {}", userRequest.getLogin());
 
         User user = modelMapper.map(userRequest, User.class);
         user.setCreatedAt(LocalDateTime.now());
@@ -104,7 +103,6 @@ public class UserServiceImpl implements UserService {
     }
 
     private void validatePassword(String password) {
-        log.info("Validating password: {}", password);
         if (password == null || password.isBlank()) {
             log.warn("Password is blank");
             throw new IllegalArgumentException("Password must not be empty");

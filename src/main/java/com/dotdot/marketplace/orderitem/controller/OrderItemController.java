@@ -37,9 +37,9 @@ public class OrderItemController {
     public ResponseEntity<OrderItemResponseDto> update(@PathVariable Long id, @RequestBody Map<String, Integer> body) {
         log.info("Updating order item with id: {}", id);
         int quantity = body.get("quantity");
-        OrderItemResponseDto respons = orderItemService.updateQuantity(id, quantity);
-        log.info("Updated order item with id: {}", respons.getId());
-        return ResponseEntity.ok(respons);
+        OrderItemResponseDto response = orderItemService.updateQuantity(id, quantity);
+        log.info("Updated order item with id: {}", response.getId());
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
