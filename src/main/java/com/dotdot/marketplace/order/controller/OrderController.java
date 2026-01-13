@@ -5,6 +5,7 @@ import com.dotdot.marketplace.order.dto.OrderRequestDto;
 import com.dotdot.marketplace.order.dto.OrderResponseDto;
 import com.dotdot.marketplace.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,18 +13,25 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
+@Slf4j
 @RequestMapping("/orders")
 public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
     public ResponseEntity<OrderResponseDto> createOrder(@RequestBody OrderRequestDto orderRequestDto) {
-        return ResponseEntity.ok(orderService.createOrder(orderRequestDto));
+        log.info("Creating order: {}", orderRequestDto);
+        OrderResponseDto orderResponseDto = orderService.createOrder(orderRequestDto);
+        log.info("Order created: {}", orderResponseDto);
+        return ResponseEntity.ok(orderResponseDto);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<OrderResponseDto> getOrderById(@PathVariable long id) {
-        return ResponseEntity.ok(orderService.getOrderById(id));
+        log.info("Get order by id: {}", id);
+        OrderResponseDto orderResponseDto = orderService.getOrderById(id);
+        log.info("Order retrieved: {}", id);
+        return ResponseEntity.ok(orderResponseDto);
     }
 
     @GetMapping
