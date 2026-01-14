@@ -24,7 +24,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto createUser(UserRequestDto userRequest) {
         if (userRepository.existsByLogin(userRequest.getLogin())) {
-            log.warn("Registration attempt failed: Login '{}' already taken", userRequest.getLogin());
+            log.warn("Registration attempt failed:  already taken");
             throw new RuntimeException("User with this login already exists");
         }
         validatePassword(userRequest.getPassword());
@@ -62,12 +62,11 @@ public class UserServiceImpl implements UserService {
         if (!user.getLogin().equals(userRequest.getLogin())
                 && userRepository.existsByLogin(userRequest.getLogin())) {
 
-            log.warn("Update failed: Login '{}' already taken by another user", userRequest.getLogin());
+            log.warn("Update failed: already taken by another user");
             throw new RuntimeException( "Login already taken");
         }
 
         validatePassword(userRequest.getPassword());
-        log.info("Password validation passed for login: {}", userRequest.getLogin());
         modelMapper.map(userRequest, user);
         User savedUser = userRepository.save(user);
         log.info("User updated with id: {}", savedUser.getId());
@@ -94,10 +93,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findByLogin(String login) {
-        log.info("Finding user by login: {}", login);
+        log.info("Finding user");
         return userRepository.findByLogin(login)
                 .orElseThrow(() -> {
-                    log.warn("User not found with login: {}", login);
+                    log.warn("User not found");
                     return new UserNotFoundException("User not found with login: " + login);
                 });
     }

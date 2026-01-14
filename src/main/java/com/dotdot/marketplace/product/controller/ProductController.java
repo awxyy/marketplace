@@ -34,7 +34,7 @@ public class ProductController {
     public ResponseEntity<List<ProductResponseDto>> getAll() {
         log.info("Get all products");
         List<ProductResponseDto> response = productService.getAll();
-        log.info("Product list size : {}", response.size());
+        log.info("Product list size: {}", response.size());
         return ResponseEntity.ok(response);
     }
 
@@ -60,7 +60,7 @@ public class ProductController {
     public ResponseEntity<ProductResponseDto> getById(@PathVariable long id) {
         log.info("Get product by ID: {}", id);
         ProductResponseDto response = productService.getById(id);
-        log.info("Product get by ID: {}", response.getId());
+        log.info("Product retrieved by ID: {}", response.getId());
         return ResponseEntity.ok(response);
     }
 
@@ -68,7 +68,7 @@ public class ProductController {
     public ResponseEntity<ProductResponseDto> update(@PathVariable long id, @Valid @RequestBody ProductRequestDto request) {
         log.info("Update product: {}", id);
         ProductResponseDto response = productService.update(id, request);
-        log.info("Product update with ID: {}", response.getId());
+        log.info("Product updated with ID: {}", response.getId());
         return ResponseEntity.ok(response);
     }
 

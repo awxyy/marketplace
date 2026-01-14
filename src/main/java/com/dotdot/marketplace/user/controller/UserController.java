@@ -26,7 +26,7 @@ public class UserController {
 
     @PostMapping()
     public ResponseEntity<UserResponseDto> createUser(@Valid @RequestBody UserRequestDto userRequest) {
-        log.info("Creating user with login: {}", userRequest.getLogin());
+        log.info("Creating user");
         UserResponseDto createdUser = userService.createUser(userRequest);
         log.info("User created successfully with id: {}", createdUser.getId());
         return ResponseEntity.ok(createdUser);
@@ -50,7 +50,6 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable long id) {
-        log.info("Deleting user with id: {}", id);
         userService.deleteUser(id);
         log.info("User deleted successfully with id: {}", id);
         return ResponseEntity.noContent().build();
@@ -74,7 +73,7 @@ public class UserController {
 
     @GetMapping("/{userId}/roles/{role}")
     public ResponseEntity<Boolean> hasRole(@PathVariable Long userId, @PathVariable UserRole role) {
-        log.info("Checking if user with id: {} and role: {}", userId, role);
+        log.info("Checking if user with id: {} has role: {}", userId, role);
         Boolean hasRole = userRoleService.userHasRole(userId, role);
         log.info("User has role: {}", hasRole);
         return ResponseEntity.ok(hasRole);

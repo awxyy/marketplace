@@ -188,7 +188,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private Long getCurrentUserId() {
-        log.info("Getting current user ID");
         return userDetailsService.getCurrentUserId();
     }
 
