@@ -9,6 +9,7 @@ import com.dotdot.marketplace.review.repository.ReviewRepository;
 import com.dotdot.marketplace.user.entity.User;
 import com.dotdot.marketplace.user.repository.UserRepository;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ReviewServiceImpl implements ReviewService {
 
     private final ProductRepository productRepository;
@@ -28,15 +30,23 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public ReviewResponseDto addReview(ReviewRequestDto reviewRequestDto) {
+        log.info("Adding review: {}", reviewRequestDto.getUserId());
         if(reviewRequestDto.getRating() < 1 || reviewRequestDto.getRating() > 5) {
+            log.warn("Invalid rating value: {}", reviewRequestDto.getRating());
             throw new IllegalArgumentException("Rating must be between 1 and 5");
         }
 
         Product product = productRepository.findById(reviewRequestDto.getProductId())
-                .orElseThrow(() -> new IllegalArgumentException("Product not found with ID: "+ reviewRequestDto.getProductId()));
+                .orElseThrow(() ->{
+                 log.warn("Product not found: {}", reviewRequestDto.getProductId());
+                 return new IllegalArgumentException("Product not found with ID: "+ reviewRequestDto.getProductId());
+                });
 
         User user = userRepository.findById(reviewRequestDto.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> {
+                    log.warn("User not found: {}", reviewRequestDto.getUserId());
+                    return new IllegalArgumentException("User not found");
+                });
 
         Review review = new Review();
         review.setProduct(product);
@@ -46,15 +56,17 @@ public class ReviewServiceImpl implements ReviewService {
         review.setCreatedAt(LocalDateTime.now());
 
         Review savedReview = reviewRepository.save(review);
-
+        log.info("Saved review: {}", savedReview.getId());
         updateProductRating(product);
-
+        log.info("Updated product rating");
         return modelMapper.map(savedReview, ReviewResponseDto.class);
     }
 
     @Override
     public List<ReviewResponseDto> getReviewsByProductId(long productId) {
+        log.info("Get reviews by product ID: {}", productId);
         if (!productRepository.existsById(productId)) {
+            log.warn("Product not found: {}", productId);
             throw new IllegalArgumentException("Product not found");
         }
         List<Review> reviews = reviewRepository.findByProductId(productId);
@@ -65,39 +77,50 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public ReviewResponseDto getReviewsById(long reviewId) {
+        log.info("Get review by ID: {}", reviewId);
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new IllegalArgumentException("Review not found"));
+                .orElseThrow(() -> {
+                    log.warn("Review not found: {}", reviewId);
+                    return new IllegalArgumentException("Review not found");
+                });
+        log.info("Review found successfully: ID {}", review.getId());
         return modelMapper.map(review, ReviewResponseDto.class);
     }
 
     @Override
     public ReviewResponseDto updateReview(ReviewRequestDto reviewRequestDto, long reviewId) {
+        log.info("Updating review: {}", reviewId);
         if(reviewRequestDto.getRating() < 1 || reviewRequestDto.getRating() > 5) {
+            log.warn("Invalid rating value: {}", reviewRequestDto.getRating());
             throw new IllegalArgumentException("Rating must be between 1 and 5");
         }
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new IllegalArgumentException("Review not found"));
+                .orElseThrow(() -> {
+                    log.warn("Review not found: {}", reviewId);
+                    return new IllegalArgumentException("Review not found");
+                });
         review.setComment(reviewRequestDto.getComment());
         review.setRating(reviewRequestDto.getRating());
 
         Review updatedReview = reviewRepository.save(review);
-
         updateProductRating(updatedReview.getProduct());
-
+        log.info("Review updated successfully: {}", updatedReview.getId());
         return modelMapper.map(updatedReview, ReviewResponseDto.class);
     }
 
     @Override
     public void deleteReview(long reviewId) {
+        log.info("Deleting review: {}", reviewId);
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new IllegalArgumentException("Review not found"));
         Product product = review.getProduct();
         reviewRepository.delete(review);
         updateProductRating(product);
-
+        log.info("Review deleted successfully: {}", reviewId);
     }
 
     public double getAverageRating(long productId) {
+        log.info("Get average rating: {}", productId);
         List<Review> reviews = reviewRepository.findByProductId(productId);
         return reviews.stream()
                 .mapToInt(Review::getRating)
@@ -106,10 +129,12 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     public long getReviewCount(long productId) {
+        log.info("Get review count: {}", productId);
         return reviewRepository.countByProductId(productId);
     }
 
     private void updateProductRating(Product product) {
+        log.info("Updating product rating: {}", product.getId());
         List<Review> reviews = reviewRepository.findByProductId(product.getId());
 
         double avgRating = reviews.stream()
@@ -120,6 +145,7 @@ public class ReviewServiceImpl implements ReviewService {
         product.setAverageRating(avgRating);
         product.setReviewsCount((long) reviews.size());
         productRepository.save(product);
+        log.info("Product rating updated successfully: {}", product.getId());
     }
 
 }
