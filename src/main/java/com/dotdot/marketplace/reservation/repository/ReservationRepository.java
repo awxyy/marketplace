@@ -17,7 +17,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findByUserIdAndStatus(Long userId, ReservationStatus status);
 
-    List<Reservation> findByExpiresAtBeforeAndStatus(ReservationStatus status, LocalDateTime expiredBefore);
+    List<Reservation> findByStatusAndExpiresAtBefore(ReservationStatus status, LocalDateTime expiredBefore);
 
     @Modifying
     @Query("UPDATE Reservation r SET r.status = :newStatus WHERE r.expiresAt < :expiredBefore AND r.status = :currentStatus")

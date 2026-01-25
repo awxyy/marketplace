@@ -138,7 +138,7 @@ public class ReservationService {
     public int cleanupExpiredReservations() {
         LocalDateTime now = LocalDateTime.now();
 
-        List<Reservation> expiredReservations = reservationRepository.findByExpiresAtBeforeAndStatus(
+        List<Reservation> expiredReservations = reservationRepository.findByStatusAndExpiresAtBefore(
                 ReservationStatus.ACTIVE, now
         );
 

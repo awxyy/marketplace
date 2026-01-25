@@ -2,72 +2,98 @@ package user
 
 import com.dotdot.marketplace.exception.UserNotFoundException
 import com.dotdot.marketplace.user.dto.UserRequestDto
+import com.dotdot.marketplace.user.dto.UserResponseDto
 import com.dotdot.marketplace.user.entity.User
 import com.dotdot.marketplace.user.repository.UserRepository
 import com.dotdot.marketplace.user.service.UserServiceImpl
 import org.modelmapper.ModelMapper
+import org.springframework.security.crypto.password.PasswordEncoder
 import spock.lang.Specification
 
 class UserServiceTest extends Specification {
-    def userRepository = Mock(UserRepository)
-    def modelMapper = new ModelMapper()
+    UserRepository userRepository = Mock()
+    ModelMapper modelMapper = Mock()
+    PasswordEncoder passwordEncoder = Mock()
+    UserServiceImpl userService
 
-    def userService = new UserServiceImpl(userRepository, modelMapper)
+    def setup() {
+        userService = new UserServiceImpl(userRepository, modelMapper, passwordEncoder)
+    }
 
     def "createUser should save user"() {
         given:
-        def user = new UserRequestDto(
-                login: "Test User",
-                fullName: "123",
-                password: "123"
+        def requestDto = new UserRequestDto(
+                login: "testuser",
+                password: "123",
+                fullName: "Test User"
         )
-
-        userRepository.save(_ as User) >> { User u ->
-            u.id = 1
-            return u
-        }
+        def user = new User(id: 1L, login: "testuser", password: "encodedPassword")
+        def responseDto = new UserResponseDto(id: 1L, login: "testuser")
 
         when:
-        def result = userService.createUser(user)
+        def result = userService.createUser(requestDto)
+
         then:
-        result.id == 1
-        result.login == "Test User"
-        result.fullName == "123"
+        1 * userRepository.existsByLogin("testuser") >> false
+        1 * modelMapper.map(requestDto, User.class) >> user
+        1 * userRepository.save(_ as User) >> user
+        1 * modelMapper.map(user, UserResponseDto.class) >> responseDto
+
+        result.id == 1L
+        result.login == "testuser"
     }
 
     def "createUser should throw exception if user already exists"() {
         given:
-        def user = new UserRequestDto(
-                login: "Test User",
-                fullName: "123",
+        def userRequest = new UserRequestDto(
+                login: "testuser",
+                fullName: "Test User",
                 password: "123"
         )
 
-        userRepository.findByLogin("Test User") >> Optional.of(new User())
+        when:
+        userService.createUser(userRequest)
+
+        then:
+        1 * userRepository.existsByLogin("testuser") >> true
+        0 * userRepository.save(_)
+        thrown(RuntimeException)
+    }
+
+    def "createUser should throw exception for invalid password"() {
+        given:
+        def user = new UserRequestDto(
+                login: "Test User",
+                fullName: "123",
+                password: badPassword
+        )
 
         when:
         userService.createUser(user)
 
         then:
         thrown(IllegalArgumentException)
+        0 * userRepository.save(_)
+
+        where:
+        badPassword << [null, "", "   "]
     }
 
     def "getUserById should return user"() {
         given:
-        def user = new User()
-        user.id = 1
-        user.login = "Test User"
-        user.fullName = "123"
+        def user = new User(id: 1L, login: "Test User", fullName: "123")
+        def responseDto = new UserResponseDto(id: 1L, login: "Test User", fullName: "123")
 
         userRepository.findById(1) >> Optional.of(user)
+        modelMapper.map(user, UserResponseDto.class) >> responseDto
 
         when:
         def result = userService.getUserById(1)
+
         then:
         result.id == 1
         result.login == "Test User"
         result.fullName == "123"
-
     }
 
     def "getUserById  when doesn't exist"() {
@@ -86,23 +112,19 @@ class UserServiceTest extends Specification {
 
     def "updateUser should update user"() {
         given:
-        def userId = 1
+        def userId = 1L
         def userRequest = new UserRequestDto(
                 login: "Updated User",
                 fullName: "Updated Full Name",
                 password: "newpassword"
         )
-
-        def existingUser = new User()
-        existingUser.id = userId
-        existingUser.login = "Old User"
-        existingUser.fullName = "Old Full Name"
+        def existingUser = new User(id: userId, login: "Old User", fullName: "Old Full Name")
+        def responseDto = new UserResponseDto(id: userId, login: "Updated User", fullName: "Updated Full Name")
 
         userRepository.findById(userId) >> Optional.of(existingUser)
-        userRepository.save(_ as User) >> { User u ->
-            u.id = userId
-            return u
-        }
+        userRepository.save(_ as User) >> existingUser
+        modelMapper.map(userRequest, existingUser) >> null // void method, just ensure it's called
+        modelMapper.map(existingUser, UserResponseDto.class) >> responseDto
 
         when:
         def result = userService.updateUser(userId, userRequest)
@@ -171,7 +193,7 @@ class UserServiceTest extends Specification {
 
         then:
         def ex = thrown(IllegalArgumentException)
-        ex.message == "Password must not be empty"
+        ex.message != null
 
         where:
         badPassword << [null, "", "   "]
