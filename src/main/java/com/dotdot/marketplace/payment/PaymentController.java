@@ -1,17 +1,15 @@
 package com.dotdot.marketplace.payment;
 
-import com.dotdot.marketplace.product.dto.CheckoutRequest;
+import com.dotdot.marketplace.payment.dto.CheckoutRequest;
 import com.dotdot.marketplace.product.dto.ProductResponseDto;
-import com.dotdot.marketplace.product.entity.Product;
-import com.dotdot.marketplace.product.service.ProductService;
 import com.dotdot.marketplace.product.service.ProductServiceImpl;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
+import com.stripe.param.checkout.SessionCreateParams;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import com.stripe.param.checkout.SessionCreateParams;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,13 +28,10 @@ public class PaymentController {
     }
 
 
-    @PostMapping("/create-checkout-session")
-    public Map<String,String> createCheckoutSession(@RequestBody CheckoutRequest request ) throws StripeException {
+    @PostMapping("/auth/create-checkout-session")
+    public Map<String, String> createCheckoutSession(@RequestBody CheckoutRequest request) throws StripeException {
         ProductResponseDto product = productService.getById(request.getProductId());
 
-        if (product == null) {
-            throw new RuntimeException("Product not found");
-        }
         SessionCreateParams.LineItem.PriceData.ProductData productData =
                 SessionCreateParams.LineItem.PriceData.ProductData.builder()
                         .setName(product.getName())
@@ -79,7 +74,7 @@ public class PaymentController {
 
         Session session = Session.create(params);
 
-        Map<String,String> response = new HashMap<>();
+        Map<String, String> response = new HashMap<>();
         response.put("url", session.getUrl());
 
         return response;

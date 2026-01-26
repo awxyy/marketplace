@@ -1,4 +1,4 @@
-package com.dotdot.marketplace.product.dto;
+package com.dotdot.marketplace.payment.dto;
 
 import lombok.Data;
 

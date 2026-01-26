@@ -1,48 +1,48 @@
-    app:
-      reservation:
-        ttl-minutes: 15
+app:
+  reservation:
+    ttl-minutes: 15
 
-    spring:
-      application:
-        name: marketplace
+spring:
+  application:
+    name: marketplace
 
-      datasource:
-        url: jdbc:postgresql://localhost:5432/marketplace_db?options=-c%20timezone=UTC
-        username: postgres
-        password: postgres
-        driver-class-name: org.postgresql.Driver
+  datasource:
+    url: jdbc:postgresql://localhost:5432/marketplace_db?options=-c%20timezone=UTC
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
 
-      jpa:
-        hibernate:
-          ddl-auto: none
-        show-sql: true
-        properties:
-          hibernate:
-            format_sql: true
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
 
-      flyway:
-        enabled: true
-        baseline-on-migrate: true
-        repair: true
-        out-of-order: true
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    repair: true
+    out-of-order: true
 
-      data:
-        redis:
-          host: localhost
-          port: 6379
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
-      cache:
-        redis:
-          time-to-live: 600000
+  cache:
+    redis:
+      time-to-live: 600000
 
-    server:
-      port: 8080
+server:
+  port: 8080
 
-    jwt:
-      secret: yO1Zm6nvzSnt2E2j9Y4WxRYb1d8Xq3tPL5jJwDlQ/3Y=
-      access-token-expiration-ms: 900000
-      refresh-token-expiration-ms: 604800000
+jwt:
+  secret: yO1Zm6nvzSnt2E2j9Y4WxRYb1d8Xq3tPL5jJwDlQ/3Y=
+  access-token-expiration-ms: 900000
+  refresh-token-expiration-ms: 604800000
 
-    stripe:
-      api:
-        key: ${STRIPE_API_KEY}
+stripe:
+  api:
+    key: ${STRIPE_API_KEY}

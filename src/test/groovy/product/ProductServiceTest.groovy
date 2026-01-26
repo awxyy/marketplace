@@ -24,7 +24,6 @@ import java.time.LocalDateTime
 class ProductServiceTest extends Specification {
     ProductRepository productRepository = Mock()
     UserRepository userRepository = Mock()
-    // Використовуємо Stub, щоб уникнути проблем із суворою перевіркою аргументів
     UserDetailsServiceImpl userDetailsService = Stub()
     ReviewService reviewService = Mock()
     ModelMapper modelMapper = new ModelMapper()
@@ -40,19 +39,16 @@ class ProductServiceTest extends Specification {
         )
     }
 
-    // ВИПРАВЛЕНИЙ МЕТОД: Тепер він повертає об'єкт User, а не null
     void mockLoggedInUser(Long userId) {
         def authentication = Mock(Authentication)
         def securityContext = Mock(SecurityContext)
         def userPrincipal = Mock(UserPrincipal)
 
-        // Створюємо юзера, якого очікує сервіс
         def mockUser = new User(id: userId)
 
         securityContext.getAuthentication() >> authentication
         authentication.getPrincipal() >> userPrincipal
 
-        // Найважливіше виправлення: мокаємо метод getUser(), який викликається в update/delete
         userPrincipal.getUser() >> mockUser
         userPrincipal.getId() >> userId
 
@@ -70,7 +66,6 @@ class ProductServiceTest extends Specification {
         def currentUser = new User(id: 1L)
 
         mockLoggedInUser(1L)
-        // Stub: повертаємо значення для будь-яких аргументів (*_)
         userDetailsService.hasRole(*_) >> true
         userDetailsService.getCurrentUserId(*_) >> 1L
 
@@ -176,7 +171,6 @@ class ProductServiceTest extends Specification {
         def userId = 1L
         def currentUser = new User(id: userId)
 
-        // Налаштування SecurityContext (mockLoggedInUser тепер правильно повертає User)
         mockLoggedInUser(userId)
         userDetailsService.hasRole(*_) >> true
 
@@ -223,9 +217,6 @@ class ProductServiceTest extends Specification {
         then:
         thrown(EntityNotFoundException)
     }
-
-    // Видалено тест "updateProduct throws exception when seller does not exist",
-    // оскільки метод update у вашому ServiceImpl не обробляє зміну sellerId.
 
     def "deleteProduct deletes product when it exists"() {
         given:
