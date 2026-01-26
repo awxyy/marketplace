@@ -7,7 +7,7 @@ spring:
     name: marketplace
 
   datasource:
-    url: jdbc:postgresql://localhost:5433/marketplace
+    url: jdbc:postgresql://localhost:5432/marketplace_db?options=-c%20timezone=UTC
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
@@ -42,3 +42,7 @@ jwt:
   secret: yO1Zm6nvzSnt2E2j9Y4WxRYb1d8Xq3tPL5jJwDlQ/3Y=
   access-token-expiration-ms: 900000
   refresh-token-expiration-ms: 604800000
+
+stripe:
+  api:
+    key: ${STRIPE_API_KEY}

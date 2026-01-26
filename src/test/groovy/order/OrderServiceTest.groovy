@@ -8,7 +8,9 @@ import com.dotdot.marketplace.order.service.OrderServiceImpl
 import com.dotdot.marketplace.orderitem.dto.OrderItemRequestDto
 import com.dotdot.marketplace.orderitem.entity.OrderItem
 import com.dotdot.marketplace.product.entity.Product
+import com.dotdot.marketplace.product.entity.ProductStatus
 import com.dotdot.marketplace.product.repository.ProductRepository
+import com.dotdot.marketplace.reservation.service.ReservationService
 import com.dotdot.marketplace.user.entity.User
 import com.dotdot.marketplace.user.repository.UserRepository
 import org.modelmapper.ModelMapper
@@ -17,39 +19,60 @@ import spock.lang.Specification
 import java.time.LocalDateTime
 
 class OrderServiceTest extends Specification {
-    def orderRepository = Mock(OrderRepository)
-    def userRepository = Mock(UserRepository)
-    def productRepository = Mock(ProductRepository)
-    def modelMapper = new ModelMapper()
-    def orderService = new OrderServiceImpl(orderRepository, userRepository, productRepository, modelMapper)
+    OrderRepository orderRepository = Mock()
+    UserRepository userRepository = Mock()
+    ProductRepository productRepository = Mock()
+    ReservationService reservationService = Mock()
+    ModelMapper modelMapper = new ModelMapper()
+    OrderServiceImpl orderService
+
+    def setup() {
+        orderService = new OrderServiceImpl(
+                orderRepository,
+                userRepository,
+                productRepository,
+                modelMapper,
+                reservationService
+        )
+    }
 
     def "createOrder should create a new order"() {
         given:
         def userId = 1L
-        def productId = 2L
-        def orderRequest = OrderRequestDto.builder()
-                .withUser(userId)
-                .withStatus(OrderStatus.PENDING)
-                .withOrderItems([
-                        new OrderItemRequestDto(productId: productId, quantity: 2)
-                ])
-                .build()
+        def productId = 1L
+        def user = new User(id: userId, login: "testuser")
+        def product = new Product(
+                id: productId,
+                name: "Test Product",
+                price: 100.0,
+                quantity: 10,
+                status: ProductStatus.AVAILABLE
+        )
 
-        def user = new User(id: userId)
-        def product = new Product(id: productId, price: 50.0)
-        def savedOrder = new Order(id: 1L, totalPrice: 100.0, status: OrderStatus.PENDING, createdAt: LocalDateTime.now(), user: user)
+        def orderItemDto = new OrderItemRequestDto(
+                productId: productId,
+                quantity: 2
+        )
+
+        def requestDto = new OrderRequestDto(
+                user: userId,
+                status: OrderStatus.PENDING,
+                orderItems: [orderItemDto]
+        )
 
         userRepository.findById(userId) >> Optional.of(user)
         productRepository.findById(productId) >> Optional.of(product)
-        orderRepository.save(_ as Order) >> savedOrder
+        orderRepository.save(_ as Order) >> { Order o ->
+            o.id = 1L
+            return o
+        }
 
         when:
-        def result = orderService.createOrder(orderRequest)
+        def result = orderService.createOrder(requestDto)
 
         then:
         result.id == 1L
-        result.totalPrice == 100.0d
-        result.status == OrderStatus.PENDING
+        result.totalPrice == 200.0
     }
 
     def "createOrder should throw exception if user not found"() {

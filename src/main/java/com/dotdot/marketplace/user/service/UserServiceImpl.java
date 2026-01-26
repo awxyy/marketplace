@@ -8,6 +8,7 @@ import com.dotdot.marketplace.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,7 +21,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
-
+    private final PasswordEncoder passwordEncoder;
     @Override
     public UserResponseDto createUser(UserRequestDto userRequest) {
         if (userRepository.existsByLogin(userRequest.getLogin())) {
