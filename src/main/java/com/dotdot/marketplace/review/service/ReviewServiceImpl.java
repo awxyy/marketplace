@@ -1,5 +1,6 @@
 package com.dotdot.marketplace.review.service;
 
+import com.dotdot.marketplace.mongo.service.LogService;
 import com.dotdot.marketplace.product.entity.Product;
 import com.dotdot.marketplace.product.repository.ProductRepository;
 import com.dotdot.marketplace.review.dto.ReviewRequestDto;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -27,24 +29,30 @@ public class ReviewServiceImpl implements ReviewService {
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
     private final ModelMapper modelMapper;
+    private final LogService logService;
+
+    private static final String LOG_SOURCE = "ReviewServiceImpl";
 
     @Override
     public ReviewResponseDto addReview(ReviewRequestDto reviewRequestDto) {
         log.info("Adding review: {}", reviewRequestDto.getUserId());
         if(reviewRequestDto.getRating() < 1 || reviewRequestDto.getRating() > 5) {
-            log.warn("Invalid rating value: {}", reviewRequestDto.getRating());
+            String errorMsg = "Invalid rating value: " + reviewRequestDto.getRating();
+            logService.error(LOG_SOURCE, errorMsg, new IllegalArgumentException(errorMsg));
             throw new IllegalArgumentException("Rating must be between 1 and 5");
         }
 
         Product product = productRepository.findById(reviewRequestDto.getProductId())
                 .orElseThrow(() ->{
-                 log.warn("Product not found: {}", reviewRequestDto.getProductId());
+                    String errorMsg = "Product not found: " + reviewRequestDto.getProductId();
+                    logService.error(LOG_SOURCE, errorMsg, new IllegalArgumentException(errorMsg));
                  return new IllegalArgumentException("Product not found with ID: "+ reviewRequestDto.getProductId());
                 });
 
         User user = userRepository.findById(reviewRequestDto.getUserId())
                 .orElseThrow(() -> {
-                    log.warn("User not found: {}", reviewRequestDto.getUserId());
+                    String errorMsg = "User not found: " + reviewRequestDto.getUserId();
+                    logService.error(LOG_SOURCE, errorMsg, new IllegalArgumentException(errorMsg));
                     return new IllegalArgumentException("User not found");
                 });
 
@@ -56,9 +64,14 @@ public class ReviewServiceImpl implements ReviewService {
         review.setCreatedAt(LocalDateTime.now());
 
         Review savedReview = reviewRepository.save(review);
-        log.info("Saved review: {}", savedReview.getId());
+        Map<String, Object> logData = Map.of(
+                "reviewId", savedReview.getId(),
+                "productId", product.getId(),
+                "userId", user.getId()
+        );
+        logService.info(LOG_SOURCE, "Review added successfully", logData);
         updateProductRating(product);
-        log.info("Updated product rating");
+
         return modelMapper.map(savedReview, ReviewResponseDto.class);
     }
 
