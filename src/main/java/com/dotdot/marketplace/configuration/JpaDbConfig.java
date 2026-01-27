@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
         basePackages = "com.dotdot.marketplace",
         excludeFilters = @ComponentScan.Filter(
                 type = FilterType.REGEX
-                , pattern = "com.dotdot.marketplace.mongo.repository.*"
+                , pattern = "com\\.dotdot\\.marketplace\\.mongo\\.repository\\..*"
         )
 )
 public class JpaDbConfig {

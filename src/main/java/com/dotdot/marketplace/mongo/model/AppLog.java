@@ -29,7 +29,7 @@ public class AppLog {
     public AppLog(String message, String level, String source, Map<String,Object> metadata) {
         this.message = message;
         this.level = level;
-        this.timestamp = timestamp != null ? timestamp : LocalDateTime.now();
+        this.timestamp = LocalDateTime.now();
         this.source = source;
         this.metadata = metadata;
     }

@@ -3,7 +3,7 @@ INSERT INTO users (id, full_name, login, password, created_at)
 VALUES
     (5, 'Apple Reseller', 'seller5', '$2a$10$U5n/ysgNXgo.iRF5CFarN.of.XycCp34SlxWn3Tah7rzu2whbGKsG', NOW()),
     (6, 'Gadget Store', 'seller6', '$2a$10$U5n/ysgNXgo.iRF5CFarN.of.XycCp34SlxWn3Tah7rzu2whbGKsG', NOW())
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT DO NOTHING;
 
 -- 2. ТЕПЕР додаємо продукти, прив'язані до цих ID
 INSERT INTO products (name, description, price, status, seller)
