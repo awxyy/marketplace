@@ -1,5 +1,6 @@
 package com.dotdot.marketplace.product.entity;
 
+import com.dotdot.marketplace.productImage.entity.ProductImage;
 import com.dotdot.marketplace.review.entity.Review;
 import com.dotdot.marketplace.user.entity.User;
 import jakarta.persistence.*;
@@ -52,6 +53,9 @@ public class Product {
     @Column(name = "review_count")
     private Long reviewsCount = 0L;
 
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("sortOrder ASC")
+    private List<ProductImage> images = new ArrayList<>();
 
     public int getAvailableQuantity() {
         return quantity - reservedQuantity;

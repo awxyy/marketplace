@@ -31,6 +31,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/api/**").permitAll()
+                        .requestMatchers("/auth/create-checkout-session").permitAll()
                         .anyRequest().authenticated()
                 )
                 .authenticationManager(authenticationConfiguration.getAuthenticationManager())

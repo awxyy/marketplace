@@ -50,3 +50,9 @@ jwt:
 stripe:
   api:
     key: ${STRIPE_API_KEY}
+
+minio:
+  url: http://127.0.0.1:9000
+  access-key: ${MINIO_ACCESS_KEY}
+  secret-key: ${MINIO_SECRET_KEY}
+  bucket-name: marketplace-images
