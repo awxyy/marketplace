@@ -14,7 +14,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: true
     properties:
       hibernate:
@@ -53,6 +53,6 @@ stripe:
 
 minio:
   url: http://127.0.0.1:9000
-  access-key: admin
-  secret-key: password123
+  access-key: ${MINIO_ACCESS_KEY}
+  secret-key: ${MINIO_SECRET_KEY}
   bucket-name: marketplace-images

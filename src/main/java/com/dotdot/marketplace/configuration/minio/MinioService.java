@@ -28,16 +28,16 @@ public class MinioService {
             }
 
             String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-            InputStream inputStream = file.getInputStream();
-
-            minioClient.putObject(
-                    PutObjectArgs.builder()
-                            .bucket(bucketName)
-                            .object(fileName)
-                            .stream(inputStream, file.getSize(), -1)
-                            .contentType(file.getContentType())
-                            .build()
-            );
+            try (InputStream inputStream = file.getInputStream()) {
+                minioClient.putObject(
+                        PutObjectArgs.builder()
+                                .bucket(bucketName)
+                                .object(fileName)
+                                .stream(inputStream, file.getSize(), -1)
+                                .contentType(file.getContentType())
+                                .build()
+                );
+            }
             return fileName;
         } catch (Exception e){
             throw new RuntimeException("Error checking or creating bucket: " + e.getMessage());

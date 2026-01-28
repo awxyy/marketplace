@@ -53,7 +53,7 @@ services:
       /bin/sh -c "
       /usr/bin/mc config host add myminio http://minio:9000 admin password123;
       /usr/bin/mc mb myminio/marketplace-images;
-      /usr/bin/mc policy set download myminio/marketplace-images;
+      /usr/bin/mc policy set public download myminio/marketplace-images;
       exit 0;
       "
 
