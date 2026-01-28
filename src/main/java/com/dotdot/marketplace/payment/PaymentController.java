@@ -2,7 +2,10 @@ package com.dotdot.marketplace.payment;
 
 import com.dotdot.marketplace.payment.dto.CheckoutRequest;
 import com.dotdot.marketplace.product.dto.ProductResponseDto;
+import com.dotdot.marketplace.product.entity.Product;
+import com.dotdot.marketplace.product.repository.ProductRepository;
 import com.dotdot.marketplace.product.service.ProductServiceImpl;
+import com.dotdot.marketplace.productImage.entity.ProductImage;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
@@ -20,11 +23,14 @@ import java.util.Map;
 public class PaymentController {
 
     private final ProductServiceImpl productService;
+    private final ProductRepository productRepository;
 
     public PaymentController(@Value("${stripe.api.key}") String stripeApiKey,
+                             ProductRepository productRepository,
                              ProductServiceImpl productService) {
         Stripe.apiKey = stripeApiKey;
         this.productService = productService;
+        this.productRepository = productRepository;
     }
 
 
@@ -32,11 +38,28 @@ public class PaymentController {
     public Map<String, String> createCheckoutSession(@RequestBody CheckoutRequest request) throws StripeException {
         ProductResponseDto product = productService.getById(request.getProductId());
 
-        SessionCreateParams.LineItem.PriceData.ProductData productData =
-                SessionCreateParams.LineItem.PriceData.ProductData.builder()
-                        .setName(product.getName())
-                        .build();
+        Product productEntity = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new RuntimeException("Product not found"));
 
+        String imageUrl = null;
+        if (productEntity.getImages() != null && !productEntity.getImages().isEmpty()) {
+            ProductImage mainImage = productEntity.getImages().stream()
+                    .filter(ProductImage::isMainImage)
+                    .findFirst()
+                    .orElse(productEntity.getImages().get(0));
+
+            imageUrl = "https://unexperientially-excessive-bao.ngrok-free.dev/marketplace-images/" + mainImage.getUrl();
+        }
+
+        SessionCreateParams.LineItem.PriceData.ProductData.Builder productDataBuilder =
+                SessionCreateParams.LineItem.PriceData.ProductData.builder()
+                        .setName(product.getName());
+
+        if (imageUrl != null) {
+            productDataBuilder.addImage(imageUrl);
+        }
+
+        SessionCreateParams.LineItem.PriceData.ProductData productData = productDataBuilder.build();
         long unitAmount = (long) (product.getPrice() * 100);
 
         SessionCreateParams.LineItem.PriceData priceData =
