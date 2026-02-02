@@ -24,8 +24,6 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
-
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     private final JwtProvider jwtService;
 
@@ -52,11 +50,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             .map(Object::toString)
                             .map(SimpleGrantedAuthority::new)
                             .collect(Collectors.toList());
+                } else if(rolesObj == null ) {
+                    logger.warn("JWT token has null 'roles' claim for userId: {} from IP: {}. Request: {}",
+                            userId, request.getRemoteAddr(), request.getRequestURI());
+                    filterChain.doFilter(request, response);
+                    return;
                 } else {
+                    logger.warn("JWT token has invalid 'roles' claim type. Expected List, GOT {} for userId: {} from IP: {}. Request: {}",
+                            rolesObj.getClass().getSimpleName(), userId, request.getRemoteAddr(), request.getRequestURI());
                     filterChain.doFilter(request, response);
                     return;
                 }
-
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(userId, null, authorities);
 
