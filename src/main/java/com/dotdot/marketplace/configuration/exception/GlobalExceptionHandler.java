@@ -16,11 +16,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleUnauthorizedException(UnauthorizedException ex) {
         Map<String, Object> errorResponse = Map.of(
                 "timestamp", LocalDateTime.now(),
-                "status", HttpStatus.FORBIDDEN.value(),
-                "error", "Forbidden",
+                "status", HttpStatus.UNAUTHORIZED.value(),
+                "error", "UNAUTHORIZED",
                 "message", ex.getMessage(),
                 "path", "" // Could be enhanced to include the request path
         );
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 }

@@ -20,43 +20,39 @@ class RoleValidatorTest {
     @BeforeEach
     void setUp() {
         roleValidator = new RoleValidator();
-        // Clear security context before each test
         SecurityContextHolder.clearContext();
     }
 
     @Test
     void validateRole_withValidSellerRole_shouldPass() {
-        // Arrange
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                1L, null, List.of(new SimpleGrantedAuthority("ROLE_SELLER"))
+                1L, null, List.of(
+                new SimpleGrantedAuthority("ROLE_USER"),
+                new SimpleGrantedAuthority("ROLE_SELLER")
+        )
         );
         SecurityContextHolder.getContext().setAuthentication(auth);
 
-        // Act & Assert
         assertDoesNotThrow(() -> roleValidator.validateRole(UserRole.SELLER));
     }
 
     @Test
     void validateRole_withValidUserRole_shouldPass() {
-        // Arrange
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                 1L, null, List.of(new SimpleGrantedAuthority("ROLE_USER"))
         );
         SecurityContextHolder.getContext().setAuthentication(auth);
 
-        // Act & Assert
         assertDoesNotThrow(() -> roleValidator.validateRole(UserRole.USER));
     }
 
     @Test
     void validateRole_withInvalidRole_shouldThrowUnauthorizedException() {
-        // Arrange
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                 1L, null, List.of(new SimpleGrantedAuthority("ROLE_USER"))
         );
         SecurityContextHolder.getContext().setAuthentication(auth);
 
-        // Act & Assert
         UnauthorizedException exception = assertThrows(
                 UnauthorizedException.class,
                 () -> roleValidator.validateRole(UserRole.SELLER)
@@ -65,8 +61,61 @@ class RoleValidatorTest {
     }
 
     @Test
+    void validateRole_withOneOfMultipleRequiredRoles_shouldPass() {
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                1L, null, List.of(
+                new SimpleGrantedAuthority("ROLE_USER"),
+                new SimpleGrantedAuthority("ROLE_SELLER")
+        )
+        );
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        assertDoesNotThrow(() -> roleValidator.validateRole(UserRole.USER, UserRole.SELLER));
+    }
+
+    @Test
+    void validateRole_withNoneOfMultipleRequiredRoles_shouldThrowUnauthorizedException() {
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                1L, null, List.of()
+        );
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        UnauthorizedException exception = assertThrows(
+                UnauthorizedException.class,
+                () -> roleValidator.validateRole(UserRole.USER)
+        );
+        assertTrue(exception.getMessage().contains("Insufficient privileges"));
+    }
+
+    @Test
+    void validateRole_withAllRequiredRoles_shouldPass() {
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                1L, null, List.of(
+                new SimpleGrantedAuthority("ROLE_USER"),
+                new SimpleGrantedAuthority("ROLE_SELLER")
+        )
+        );
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        assertDoesNotThrow(() -> roleValidator.validateRole(UserRole.USER, UserRole.SELLER));
+    }
+
+    @Test
+    void validateRole_withEmptyRoles_shouldThrowUnauthorizedException() {
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                1L, null, List.of(new SimpleGrantedAuthority("ROLE_USER"))
+        );
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        UnauthorizedException exception = assertThrows(
+                UnauthorizedException.class,
+                () -> roleValidator.validateRole()
+        );
+        assertTrue(exception.getMessage().contains("Insufficient privileges"));
+    }
+
+    @Test
     void validateRole_withNoAuthentication_shouldThrowUnauthorizedException() {
-        // Act & Assert
         UnauthorizedException exception = assertThrows(
                 UnauthorizedException.class,
                 () -> roleValidator.validateRole(UserRole.USER)
@@ -76,17 +125,42 @@ class RoleValidatorTest {
 
     @Test
     void getCurrentUserId_withValidAuthentication_shouldReturnUserId() {
-        // Arrange
         Long expectedUserId = 123L;
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                 expectedUserId, null, List.of(new SimpleGrantedAuthority("ROLE_USER"))
         );
         SecurityContextHolder.getContext().setAuthentication(auth);
 
-        // Act
         Long actualUserId = roleValidator.getCurrentUserId();
 
-        // Assert
         assertEquals(expectedUserId, actualUserId);
+    }
+
+    @Test
+    void validateRole_sellerCanAccessUserEndpoints() {
+        // SELLER може заходити на USER ендпоінти
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                1L, null, List.of(
+                new SimpleGrantedAuthority("ROLE_USER"),
+                new SimpleGrantedAuthority("ROLE_SELLER")
+        )
+        );
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        assertDoesNotThrow(() -> roleValidator.validateRole(UserRole.USER));
+    }
+
+    @Test
+    void validateRole_userCannotAccessSellerEndpoints() {
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                1L, null, List.of(new SimpleGrantedAuthority("ROLE_USER"))
+        );
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        UnauthorizedException exception = assertThrows(
+                UnauthorizedException.class,
+                () -> roleValidator.validateRole(UserRole.SELLER)
+        );
+        assertTrue(exception.getMessage().contains("Insufficient privileges"));
     }
 }
