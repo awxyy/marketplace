@@ -40,7 +40,15 @@ public class JwtProvider {
         long now = System.currentTimeMillis();
 
         Map<String, Object> claims = new HashMap<>(extraClaims);
-        claims.put("userId", userDetails.getUsername());
+        claims.put("sub", userDetails.getUsername()); // Standard JWT subject claim
+        
+        // Extract user ID if UserPrincipal
+        if (userDetails instanceof com.dotdot.marketplace.user.security.UserPrincipal) {
+            com.dotdot.marketplace.user.security.UserPrincipal userPrincipal = 
+                (com.dotdot.marketplace.user.security.UserPrincipal) userDetails;
+            claims.put("userId", userPrincipal.getId());
+        }
+        
         claims.put("roles", userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList());
@@ -78,6 +86,19 @@ public class JwtProvider {
 
     public Long extractUserId(String token) {
         return extractClaims(token, claims -> claims.get("userId", Long.class));
+    }
+
+    public String extractRoles(String token) {
+        return extractClaims(token, claims -> {
+            Object roles = claims.get("roles");
+            if (roles instanceof java.util.List<?>) {
+                java.util.List<?> rolesList = (java.util.List<?>) roles;
+                return rolesList.stream()
+                        .map(Object::toString)
+                        .collect(java.util.stream.Collectors.joining(","));
+            }
+            return roles != null ? roles.toString() : "";
+        });
     }
 
 }
