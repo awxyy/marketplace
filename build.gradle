@@ -63,7 +63,14 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
-
+    testImplementation 'io.cucumber:cucumber-java:7.15.0'
+    testImplementation 'io.cucumber:cucumber-junit-platform-engine:7.15.0'
+    testImplementation 'org.junit.platform:junit-platform-suite:1.10.1'
+    testImplementation 'io.rest-assured:rest-assured:5.5.0'
+    testImplementation 'org.testcontainers:testcontainers:1.20.1'
+    testImplementation 'org.testcontainers:postgresql:1.20.1'
+    testImplementation 'org.testcontainers:junit-jupiter:1.20.1'
+    testImplementation 'io.cucumber:cucumber-spring:7.18.0'
 }
 
 tasks.named('test') {
